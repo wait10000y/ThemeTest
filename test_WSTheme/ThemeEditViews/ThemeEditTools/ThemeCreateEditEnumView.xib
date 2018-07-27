@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="ThemeCreateEditEnumView">
+            <rect key="frame" x="0.0" y="0.0" width="300" height="200"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UhV-nc-Kgb">
+                    <rect key="frame" x="5" y="0.0" width="290" height="195"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="选取内容:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qyx-7u-4Od">
+                            <rect key="frame" x="0.0" y="0.0" width="290" height="20"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="20" id="rkQ-a9-ELq"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="w3Y-N7-RE6">
+                            <rect key="frame" x="10" y="22" width="270" height="173"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <inset key="separatorInset" minX="1" minY="0.0" maxX="1" maxY="0.0"/>
+                            <connections>
+                                <outlet property="dataSource" destination="iN0-l3-epB" id="6uw-FF-49t"/>
+                                <outlet property="delegate" destination="iN0-l3-epB" id="RkD-nd-XPg"/>
+                            </connections>
+                        </tableView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="w3Y-N7-RE6" firstAttribute="top" secondItem="Qyx-7u-4Od" secondAttribute="bottom" constant="2" id="6zM-aH-uOC"/>
+                        <constraint firstAttribute="bottom" secondItem="w3Y-N7-RE6" secondAttribute="bottom" id="F8p-uj-euA"/>
+                        <constraint firstItem="Qyx-7u-4Od" firstAttribute="leading" secondItem="UhV-nc-Kgb" secondAttribute="leading" id="j4F-j7-smj"/>
+                        <constraint firstAttribute="trailing" secondItem="w3Y-N7-RE6" secondAttribute="trailing" constant="10" id="mHw-nP-hE2"/>
+                        <constraint firstItem="Qyx-7u-4Od" firstAttribute="top" secondItem="UhV-nc-Kgb" secondAttribute="top" id="pkb-Jb-VJ9"/>
+                        <constraint firstItem="w3Y-N7-RE6" firstAttribute="leading" secondItem="UhV-nc-Kgb" secondAttribute="leading" constant="10" id="qzE-Y4-Njp"/>
+                        <constraint firstAttribute="trailing" secondItem="Qyx-7u-4Od" secondAttribute="trailing" id="zG3-Zt-LlD"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <constraints>
+                <constraint firstItem="UhV-nc-Kgb" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="8bN-5w-VWc"/>
+                <constraint firstAttribute="bottom" secondItem="UhV-nc-Kgb" secondAttribute="bottom" constant="5" id="Cg2-bh-bQK"/>
+                <constraint firstAttribute="trailing" secondItem="UhV-nc-Kgb" secondAttribute="trailing" constant="5" id="RrB-0E-FWk"/>
+                <constraint firstItem="UhV-nc-Kgb" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="5" id="eSn-V6-iOo"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="tableView" destination="w3Y-N7-RE6" id="5aX-d8-D12"/>
+                <outlet property="textTitle" destination="Qyx-7u-4Od" id="Qnh-c5-e9P"/>
+            </connections>
+            <point key="canvasLocation" x="-25" y="-132"/>
+        </view>
+    </objects>
+</document>

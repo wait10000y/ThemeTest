@@ -1,0 +1,39 @@
+
+
+{
+
+    "statusBarStyle":{"name":"状态条样式","desc":"状态条样式描述","order":-1,"type":"num","default":0,"enums":{"白色状态条":1,"黑色状态条":0}},
+    "normal_backgroundColor":{"name":"通用背景色","desc":"通用背景色描述","order":0,"type":"color","default":"#FFFFFF"},
+
+    "navBarDefine":{"name":"navBar设置","desc":"navBar设置描述","order":1,"type":"node"},
+    "navBarDefine.title":{"name":"navBar标题","desc":"navBar标题描述","order":1,"type":"text","default":"我是标题"},
+    "navBarDefine.tinColor":{"name":"navBar按钮色","desc":"navBar按钮色描述","order":2,"type":"color","default":"0x00ff00"},
+    "navBarDefine.barTinColor":{"name":"navBar背景色","desc":"navBar背景色描述","order":3,"type":"color","default":"#66DD2134"},
+    "navBarDefine.barTitleAttrs":{"name":"navBar标题样式","desc":"navBar标题样式描述","order":4,"type":"dict","default":{
+        "NSForegroundColorAttributeName":"2233FF",
+        "NSFontAttributeName":22,
+        "NSUnderlineStyleAttributeName":2
+    }},
+
+
+    "imageView":{"name":"图片控件设置","desc":"图片控件设置描述","order":2,"type":"node"},
+    "imageView.background":{"name":"背景色","desc":"背景色描述","order":1,"type":"color","default":"#EECCCC"},
+    "imageView.defaultImage":{"name":"默认图片","desc":"默认图片描述","order":2,"type":"image","default":"testpic.png"},
+    "imageView.orginImage":{"name":"远程图片","desc":"远程图片描述","order":3,"type":"image","default":"https://www.baidu.com/img/bd_logo.png"},
+
+    "color":{"name":"颜色设置","desc":"颜色设置描述","order":3,"type":"node"},
+    "color.textColor":{"name":"字体颜色","desc":"字体颜色描述","order":1,"type":"color","default":"FF2233FF"},
+
+    "textView":{"name":"文本样式设置","desc":"文本样式描述","order":4,"type":"node"},
+    "textView.textColor":{"name":"字体颜色","desc":"字体颜色描述","order":1,"type":"color","default":"FF2233FF"},
+    "textView.textFont":{"name":"字体样式","desc":"字体样式描述","order":2,"type":"font","default":"SFUIDisplay-Bold:22"},
+
+
+    "_info":{"name":"主题附加信息","desc":"主题附加信息描述","order":10,"type":"node"},
+    "_info.name":{"name":"主题名称","desc":"主题名称描述","order":1,"type":"text","default":"默认主题"},
+    "_info.desc":{"name":"主题描述","desc":"主题描述描述","order":2,"type":"text","default":"主题描述"},
+    "_info.author":{"name":"作者","desc":"作者描述","order":3,"type":"text","default":"作者"},
+    "_info.date":{"name":"创作时间","desc":"创作时间描述","order":4,"type":"text","default":"2018.06"}
+
+
+}

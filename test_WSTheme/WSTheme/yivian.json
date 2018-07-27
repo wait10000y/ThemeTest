@@ -1,0 +1,157 @@
+
+
+{
+
+    "contentView":{
+        "backGroundColor":"",
+        "alertTextColor":"",
+        "alertTextFont":"",
+        "alertBackBroundColor":""
+    },
+
+    "tabBar":{
+        "barBarTintColor":"",
+        "barBackGroundColor":"",
+
+        "bar1Color":"",
+        "bar1tintColor":"",
+
+        "bar2Color":"",
+        "bar2tintColor":"",
+
+        "bar3Color":"",
+        "bar3tintColor":"",
+
+        "bar4Color":"",
+        "bar4tintColor":""
+    },
+
+    "categoryView":{
+        "backgroundColor":"",
+
+        "navbarBarTinColor":"",
+        "navbarTinColor":"",
+        "navbarTitleStyle":{
+            "NSForegroundColorAttributeName": "#000000",
+            "NSFontAttributeName": 20
+        },
+
+        "cellSeparatorColor":"",
+        "categoryTextColorNormal":"",
+        "categoryTextColorSelected":"",
+        "categoryTFontNorml":"18",
+        "categoryTFontSelected":"19",
+
+        "cellBGColor":"",
+        "cellTitleColor":"",
+        "cellTitleFont":"",
+        "cellSubTitleColor":"",
+        "cellSubTitleFont":"",
+        "cellCategoryTitleColor":"",
+        "cellCategoryTitleFont":"",
+        "cellAuthorTitleColor":"",
+        "cellAuthorTitleFont":"",
+        "cellTimeTitleColor":"",
+        "cellTimeTitleFont":"",
+        "cellIconAlpha":"1"
+    },
+
+
+
+    "suggestView":{
+        "backgroundColor":"",
+
+        "navbarBarTinColor":"",
+        "navbarTinColor":"",
+        "navbarTitleStyle":{
+            "NSForegroundColorAttributeName": "#000000",
+            "NSFontAttributeName": 20
+        },
+
+        "cellSeparatorColor":"",
+        "cellBGColor":"",
+        "cellTitleColor":"",
+        "cellTitleFont":"",
+        "cellSubTitleColor":"",
+        "cellSubTitleFont":"",
+        "cellIconAlpha":"1"
+    },
+
+    "settingView":{
+        "backgroundColor":"",
+
+        "navbarBarTinColor":"",
+        "navbarTinColor":"",
+        "navbarTitleStyle":{
+            "NSForegroundColorAttributeName": "#000000",
+            "NSFontAttributeName": 20
+        },
+
+        "cellSeparatorColor":"",
+        "cellBGColor":"",
+        "cellTitleColor":"",
+        "cellTitleFont":"",
+        "cellSubTitleColor":"",
+        "cellSubTitleFont":"",
+        "cellIconAlpha":"1"
+    },
+
+    "favoritesView":{
+        "backgroundColor":"",
+
+        "navbarBarTinColor":"",
+        "navbarTinColor":"",
+        "navbarTitleStyle":{
+            "NSForegroundColorAttributeName": "#000000",
+            "NSFontAttributeName": 20
+        },
+
+        "searchbarTtintColor":"",
+        "searchbarBarTintColor":"",
+        "searchbarBackGroundColor":"",
+    },
+
+    "searchView":{
+        "backgroundColor":"",
+
+        "searchbarTtintColor":"",
+        "searchbarBarTintColor":"",
+        "searchbarBackGroundColor":"",
+
+        "cellSeparatorColor":"",
+        "cellBGColor":"",
+        "cellTitleColor":"",
+        "cellTitleFont":"",
+        "cellSubTitleColor":"",
+        "cellSubTitleFont":"",
+        "cellCategoryTitleColor":"",
+        "cellCategoryTitleFont":"",
+        "cellAuthorTitleColor":"",
+        "cellAuthorTitleFont":"",
+        "cellTimeTitleColor":"",
+        "cellTimeTitleFont":"",
+        "cellIconAlpha":"1"
+    },
+
+
+    "导航条设置":{
+        "导航条按钮颜色":"#37474F",
+        "导航条背景颜色": "#ffF2A1",
+        "导航条标题样式": {
+            "NSForegroundColorAttributeName": "#37FF80",
+            "NSFontAttributeName": 16
+        }
+    },
+
+    "global":{
+        "statusBarStyle":"UIStatusBarStyleLightContent",
+        "title":"我是标题",
+        "imgName":"test1"
+    },
+
+    "version":{
+        "number":"1.0",
+        "author":"wsliang",
+        "date":"2018.06"
+    }
+}

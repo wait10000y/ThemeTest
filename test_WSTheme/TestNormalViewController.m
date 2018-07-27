@@ -1,0 +1,132 @@
+//
+//  TestNormalViewController.m
+//  test_WSTheme
+//
+//  Created by 王士良 on 2018/7/20.
+//  Copyright © 2018年 王士良. All rights reserved.
+//
+
+#import "TestNormalViewController.h"
+#import "WSTheme.h"
+
+@interface TestNormalViewController ()
+
+@property (weak, nonatomic) IBOutlet UIImageView *imgView;
+@property (weak, nonatomic) IBOutlet UILabel *textLabel;
+@property (weak, nonatomic) IBOutlet UIButton *btnNext;
+- (IBAction)actionNext:(UIButton *)sender;
+
+@end
+
+@implementation TestNormalViewController
+{
+    int testIndex;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    testIndex = 0;
+     [self addWSThemeControl];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            // TODO:test
+        NSLog(@"==== 开始循环 调用切换  ====");
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            do {
+                NSLog(@"==== 执行一次 主题切换  ====");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self actionNext:nil];
+                });
+                sleep(1);
+            } while (YES);
+        });
+    });
+    
+}
+
+
+
+
+-(void)addWSThemeControl
+{
+
+        // 跟随主题切换更新一次.不需要返回的内容
+    self.btnNext.theme.custom(nil, 0, ^(UIButton *item, id value) {
+        item.tag ++;
+        NSString *title = [NSString stringWithFormat:@"切换主题(%ld)",(long)item.tag];
+        [item setTitle:title forState:UIControlStateNormal];
+
+        WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
+        [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [UIApplication sharedApplication].statusBarStyle = style.intValue;
+            });
+        }];
+
+    });
+
+
+    self.view.theme.color(@"normal_backgroundColor", ^(UIView *item, UIColor *value) {
+        item.backgroundColor = value;
+    });
+
+    self.navigationController.navigationBar.theme.custom(@"navBarDefine.barTinColor",WSThemeValueTypeColor, ^(UINavigationBar *item, UIColor *value) {
+        item.barTintColor = value;
+
+        WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
+        [cModel getDataWithIdentifier:@"navBarDefine.title" backType:WSThemeValueTypeJson complete:^(NSString *title) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.title = title;
+            });
+        }];
+
+        [cModel getDataWithIdentifier:@"navBarDefine.tinColor" backType:WSThemeValueTypeColor complete:^(UIColor *tinColor) {
+            [item performSelectorOnMainThread:@selector(setTintColor:) withObject:tinColor waitUntilDone:NO];
+        }];
+
+        [cModel getDataWithIdentifier:@"navBarDefine.barTitleAttrs" backType:WSThemeValueTypeAttribute complete:^(NSDictionary *attrs) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                item.titleTextAttributes = attrs;
+            });
+        }];
+
+    });
+
+    self.textLabel.theme.custom(@"textView.textFont", WSThemeValueTypeFont, ^(UILabel *item, UIFont *value) {
+        item.font = value;
+    }).color(@"textView.textColor", ^(UILabel *item, UIColor *value) {
+        item.textColor = value;
+        item.text = [NSString stringWithFormat:@"主题:%@,颜色:%@",[WSTheme sharedObject].currentThemeName?:@"没有主题",value?:@"默认颜色"];
+    });
+
+
+    self.imgView.theme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
+        item.image = value;
+    }).custom(@"imageView.background", WSThemeValueTypeColor, ^(UIImageView *item, UIColor *backColor) {
+        item.backgroundColor = backColor;
+    }).custom(@"imageView.defaultImage", WSThemeValueTypeImage, ^(UIImageView *item, UIImage *orginImage) {
+        item.image = orginImage;
+    });
+
+
+}
+
+
+-(void)testChangeThemeModel
+{
+    NSArray *themeList = [[WSTheme sharedObject] themeNameList];
+        //    int index = arc4random_uniform(themeList.count);
+    if (themeList.count>0) {
+        testIndex ++;
+        NSString *themeName = themeList[testIndex%themeList.count];
+        [[WSTheme sharedObject] startTheme:themeName];
+    }
+
+}
+- (IBAction)actionNext:(UIButton *)sender
+{
+    [self testChangeThemeModel];
+}
+
+@end

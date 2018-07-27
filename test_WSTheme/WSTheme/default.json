@@ -1,0 +1,42 @@
+
+{
+
+    "statusBarStyle":0,
+    "normal_backgroundColor":"#FFFFFF",
+
+    "navBarDefine":{
+        "title":"我是标题",
+        "tinColor":"0x00ff00",
+        "barTinColor":"#66DD2134",
+        "barTitleAttrs":{
+            "NSForegroundColorAttributeName":"2233FF",
+            "NSFontAttributeName":22,
+            "NSUnderlineStyleAttributeName":2
+        }
+    },
+
+    "imageView":{
+        "background":"#EECCCC",
+        "defaultImage":"testpic.png",
+        "orginImage":"https://www.baidu.com/img/bd_logo.png"
+    },
+
+    "textView":{
+        "textColor":"FF2233FF",
+        "textFont":20,
+    },
+
+
+    "normal_attrs":{
+        "NSForegroundColorAttributeName":"2233FF",
+        "NSFontAttributeName":22
+    },
+
+
+    "_info": {
+        "name": "默认主题(唯一)",
+        "desc": "主题描述",
+        "author": "作者",
+        "date":"2018.06"
+    }
+}
