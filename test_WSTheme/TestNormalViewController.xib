@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="TestNormalViewController">
             <connections>
-                <outlet property="btnNext" destination="pN1-sN-hJ7" id="WLe-Be-gBA"/>
+                <outlet property="btnNext" destination="3r0-Er-S2j" id="ouc-Xp-Bcm"/>
                 <outlet property="imgView" destination="Foj-xb-yOW" id="Pxk-va-gaz"/>
                 <outlet property="textLabel" destination="AQy-5s-Lsq" id="nxa-O9-6O7"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -36,33 +36,48 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pN1-sN-hJ7">
-                            <rect key="frame" x="107" y="136" width="140" height="48"/>
+                            <rect key="frame" x="87" y="116" width="180" height="48"/>
                             <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="140" id="I89-uW-Bei"/>
+                                <constraint firstAttribute="width" constant="180" id="I89-uW-Bei"/>
                                 <constraint firstAttribute="height" constant="48" id="s31-H6-Vt9"/>
                             </constraints>
-                            <state key="normal" title="Button"/>
+                            <state key="normal" title="手动切换"/>
                             <connections>
                                 <action selector="actionNext:" destination="-1" eventType="touchUpInside" id="TTY-pw-c9a"/>
                             </connections>
                         </button>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Foj-xb-yOW">
-                            <rect key="frame" x="10" y="228" width="335" height="308"/>
+                            <rect key="frame" x="10" y="264" width="335" height="272"/>
                             <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         </imageView>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3r0-Er-S2j">
+                            <rect key="frame" x="87" y="190" width="180" height="48"/>
+                            <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="9oh-dL-k9W"/>
+                                <constraint firstAttribute="width" constant="180" id="wNV-GI-ldO"/>
+                            </constraints>
+                            <state key="normal" title="自动切换"/>
+                            <connections>
+                                <action selector="actionNextLoop:" destination="-1" eventType="touchUpInside" id="khR-dP-pjJ"/>
+                            </connections>
+                        </button>
                     </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="Foj-xb-yOW" secondAttribute="trailing" constant="10" id="5K4-MM-c3w"/>
-                        <constraint firstItem="pN1-sN-hJ7" firstAttribute="top" secondItem="AQy-5s-Lsq" secondAttribute="bottom" constant="40" id="DFV-6k-OQb"/>
+                        <constraint firstItem="3r0-Er-S2j" firstAttribute="centerX" secondItem="TNY-zr-ak8" secondAttribute="centerX" id="7mu-Nv-eXD"/>
+                        <constraint firstItem="pN1-sN-hJ7" firstAttribute="top" secondItem="AQy-5s-Lsq" secondAttribute="bottom" constant="20" id="DFV-6k-OQb"/>
                         <constraint firstAttribute="trailing" secondItem="AQy-5s-Lsq" secondAttribute="trailing" constant="8" id="Eyf-Qi-dzw"/>
                         <constraint firstAttribute="bottom" secondItem="Foj-xb-yOW" secondAttribute="bottom" constant="11" id="Jf9-Wf-Ob4"/>
                         <constraint firstItem="AQy-5s-Lsq" firstAttribute="leading" secondItem="TNY-zr-ak8" secondAttribute="leading" constant="8" id="RgE-HH-f2W"/>
                         <constraint firstItem="AQy-5s-Lsq" firstAttribute="top" secondItem="TNY-zr-ak8" secondAttribute="top" constant="8" id="RpH-3j-ADQ"/>
+                        <constraint firstItem="Foj-xb-yOW" firstAttribute="top" secondItem="3r0-Er-S2j" secondAttribute="bottom" constant="26" id="XHe-MP-AqC"/>
                         <constraint firstItem="pN1-sN-hJ7" firstAttribute="centerX" secondItem="TNY-zr-ak8" secondAttribute="centerX" id="gib-eN-1xY"/>
-                        <constraint firstItem="Foj-xb-yOW" firstAttribute="top" secondItem="pN1-sN-hJ7" secondAttribute="bottom" constant="44" id="hqu-Av-4Qa"/>
+                        <constraint firstItem="Foj-xb-yOW" firstAttribute="top" secondItem="pN1-sN-hJ7" secondAttribute="bottom" constant="100" id="hqu-Av-4Qa"/>
                         <constraint firstItem="Foj-xb-yOW" firstAttribute="leading" secondItem="TNY-zr-ak8" secondAttribute="leading" constant="10" id="nnN-mo-YfK"/>
+                        <constraint firstItem="3r0-Er-S2j" firstAttribute="top" secondItem="pN1-sN-hJ7" secondAttribute="bottom" constant="26" id="tLW-tz-TuQ"/>
                     </constraints>
                 </view>
             </subviews>

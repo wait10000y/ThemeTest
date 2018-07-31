@@ -2,8 +2,8 @@
 //  ThemeSelectViewController.m
 //  TestTheme_sakura
 //
-//  Created by 王士良 on 2018/6/27.
-//  Copyright © 2018年 王士良. All rights reserved.
+//  Created by wsliang on 2018/6/27.
+//  Copyright © 2018年 wsliang. All rights reserved.
 //
 
 #import "ThemeSelectViewController.h"
@@ -14,7 +14,7 @@
 #import "ThemeCreateViewController.h"
 #import "UIView+YV_AlertView.h"
 
-#import "WSTheme.h"
+//#import "WSTheme.h"
 
 
 @interface ThemeSelectViewController ()<UITableViewDelegate,UITableViewDataSource>

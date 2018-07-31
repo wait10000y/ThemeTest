@@ -2,8 +2,8 @@
 //  WSTheme.h
 //  Test_LEETheme
 //
-//  Created by 王士良 on 2018/7/13.
-//  Copyright © 2018年 王士良. All rights reserved.
+//  Created by wsliang on 2018/7/13.
+//  Copyright © 2018年 wsliang. All rights reserved.
 //
 
 
@@ -60,34 +60,15 @@
 
 @class WSThemeModel,WSThemeConfig;
 
-typedef enum : NSUInteger {
-    WSThemeValueTypeOriginal = 0, // 原始值.
-    WSThemeValueTypeJson, // json格式字符串.
-    WSThemeValueTypeColor,
-    WSThemeValueTypeImage,
-    WSThemeValueTypeFont,
-    WSThemeValueTypeAttribute,// 属性字典.
-} WSThemeValueType;
 
 /**
  item:注册对象;
- value:根据identifier,valueType查找转换的数据结果值.
+ value:数据结果值.
  */
+typedef void(^WSThemeConfigValueBlock)(id item , id value);
 
-typedef void(^WSThemeConfigCustomValueBlock)(id item , id value);
-
-/**
- identifier:theme模板定义的key,keyPath;
- valueType:返回theme模板对应值转换类型;
- valueBlock 返回结果block回调;
- */
-typedef WSThemeConfig *(^WSThemeConfigCustomBlock)(NSString *identifier,WSThemeValueType valueType,WSThemeConfigCustomValueBlock valueBlock);
-
-// 直接指定返回值类型.
-typedef WSThemeConfig *(^WSThemeConfigDefinedTypeBlock)(NSString *identifier,WSThemeConfigCustomValueBlock valueBlock);
-
-//TODO: 简洁调用,仅随着theme切换而调用.
-typedef WSThemeConfig *(^WSThemeConfigMarkBlock)(void(^)(id item));
+//TODO: 简洁调用,仅随着theme切换而调用. value = WSThemeModel.
+typedef WSThemeConfig *(^WSThemeConfigConfigBlock)(WSThemeConfigValueBlock);
 
 #define WSThemeDefaultThemeName @"default"
 
@@ -106,7 +87,6 @@ typedef WSThemeConfig *(^WSThemeConfigMarkBlock)(void(^)(id item));
 -(WSThemeModel *)themeModelForName:(NSString *)themeName; // themeName是已添加的主题,其他值返回nil;
 -(NSDictionary *)themeJsonDictForName:(NSString *)themeName; // 返回 定义json的object对象.
 
-
 // 切换新主题.
 -(BOOL)startTheme:(NSString *)theName;
 
@@ -121,64 +101,33 @@ typedef WSThemeConfig *(^WSThemeConfigMarkBlock)(void(^)(id item));
 @interface WSThemeModel:NSObject
 @property(readonly, copy) NSString *name; // 名称 (theme name)
 
-// 创建方式.
-+(instancetype)createWithJsonDict:(NSDictionary *)jsonDict withName:(NSString *)theName;
-// 已转换的json对象类型.
--(BOOL)loadJsonDict:(NSDictionary *)jsonDict withName:(NSString *)theName;
-// json对象定义文件地址.
--(BOOL)loadJsonFile:(NSString *)filePath withName:(NSString *)theName;
+// 快捷创建 model
++(WSThemeModel *)getThemeModelWithDict:(NSDictionary *)themeDict withName:(NSString *)theName;
 
+// 直接赋值json对象格式.
+-(BOOL)setThemeDict:(NSDictionary *)themeDict withName:(NSString *)theName;
 
-
-    // 获取原生值类型为WSThemeValueTypeOriginal; identifier 支持keyPath格式.
-    // 当前线程执行;如果读取网络数据或耗时数据时,使用异步读取方法.
--(id)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type;
-    // 异步读取数据. complete线程为:NSOperationQueue线程池线程.
--(void)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type complete:(void(^)(id value))complete;
-
-
-// utils
-/**
- 默认匹配转换. 支持 0x,#或者直接写的三种格式十六进制的字符串. [0xffddffdd,#ffddffdd,ffddffdd], 八位时格式ARGB.六位时RGB.
- 支持 NSNumber 类型, 该类型没有alpha项.
- */
--(UIColor *)createColor:(NSString *)colorValue;
-
-/**
- NSNumber,NSSting:默认字体指定字号大小值;
- "fontName:20":指定字体名称和字号大小,:分隔符;
- */
--(UIFont *)createFont:(NSString *)fontValue;
-
-// 内容 转换成 json格式的字符串.
--(NSString *)createJsonText:(id)value;
-/**
-  支持的文件名类型:
-  "imgName" "imgName.jpg" "https://www.test.com/imgName.png"
- */
--(UIImage *)createImage:(NSString *)imgValue;
-
-/**
- 支持 NSAttributedString.h 定义的 attributeName字符串转换的key.
- 对应的value值font,color类型自动转换,number,string使用原值,其他的属性暂不支持.
- */
--(NSDictionary *)createAttributes:(NSDictionary *)attrsValue;
+// 获取指定id对应原始值. identifier使用keypath格式定义.
+// TODO: 扩展实现该方法,可以使用数据库等返回对应的数据.
+-(id)getValueWithIdentifier:(NSString *)identifier;
 
 
 @end
 
 
 @interface WSThemeConfig:NSObject
+    // 关联的更新对象.
+@property(nonatomic,weak) NSObject *currentObject;
 
-// block, WSThemeConfigValueBlock内容在主线程更新.
-@property(nonatomic,copy,readonly) WSThemeConfigCustomBlock custom;
+    // 空配置:返回当前注册对象和当前theme对应的model
+@property(nonatomic,copy,readonly) WSThemeConfigConfigBlock config;
 
-@property(nonatomic,copy,readonly) WSThemeConfigDefinedTypeBlock color;
 
 @end
 
-@interface NSObject(WSTheme)
 
+@interface NSObject(WSTheme)
+// 获取 监听文件.
 -(WSThemeConfig *)theme;
 
 @end

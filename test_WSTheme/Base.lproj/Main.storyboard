@@ -71,7 +71,7 @@
                                 <rect key="frame" x="16" y="74" width="343" height="200"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.25" translatesAutoresizingMaskIntoConstraints="NO" id="fzh-WK-vi4">
-                                        <rect key="frame" x="11" y="5" width="342" height="50"/>
+                                        <rect key="frame" x="10" y="5" width="323" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="FSS-u1-CRa"/>
                                         </constraints>
@@ -80,19 +80,21 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fYB-PN-bTg">
-                                        <rect key="frame" x="10" y="65" width="323" height="125"/>
+                                        <rect key="frame" x="139.5" y="93" width="64" height="64"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="64" id="Urp-bc-r6y"/>
+                                            <constraint firstAttribute="width" constant="64" id="VeM-rY-vpR"/>
+                                        </constraints>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="200" id="0Rh-DJ-yY2"/>
-                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="leading" secondItem="h8S-ET-aqO" secondAttribute="leading" constant="10" id="2gZ-L6-EYC"/>
-                                    <constraint firstAttribute="bottom" secondItem="fYB-PN-bTg" secondAttribute="bottom" constant="10" id="2z4-rL-0sX"/>
-                                    <constraint firstAttribute="trailing" secondItem="fYB-PN-bTg" secondAttribute="trailing" constant="10" id="8qA-EA-8gl"/>
+                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="centerY" secondItem="h8S-ET-aqO" secondAttribute="centerY" constant="25" id="GaZ-uB-5n1"/>
                                     <constraint firstAttribute="trailing" secondItem="fzh-WK-vi4" secondAttribute="trailing" constant="10" id="QFZ-rE-QaP"/>
                                     <constraint firstItem="fzh-WK-vi4" firstAttribute="leading" secondItem="h8S-ET-aqO" secondAttribute="leading" constant="10" id="Qgf-Ok-8xE"/>
                                     <constraint firstItem="fzh-WK-vi4" firstAttribute="top" secondItem="h8S-ET-aqO" secondAttribute="top" constant="5" id="UAh-f2-xG8"/>
-                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="top" secondItem="fzh-WK-vi4" secondAttribute="bottom" constant="10" id="y0s-4D-3hc"/>
+                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="centerX" secondItem="h8S-ET-aqO" secondAttribute="centerX" id="YTG-Ys-gGr"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tv6-Vl-5p5">
@@ -113,6 +115,14 @@
                                     <constraint firstAttribute="height" constant="108" id="fj5-Kz-2ia"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ZH-w8-pky">
+                                <rect key="frame" x="153" y="502" width="93" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="测试simple"/>
+                                <connections>
+                                    <action selector="testThemeSimple:" destination="WVq-2F-YCV" eventType="touchUpInside" id="xvh-Ze-G0E"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>

@@ -2,7 +2,7 @@
 //  UIView+YV_AlertView.h
 //  yivian
 //
-//  Created by 王士良 on 2018/3/28.
+//  Created by wsliang on 2018/3/28.
 //  Copyright © 2018年 yivian. All rights reserved.
 //
 

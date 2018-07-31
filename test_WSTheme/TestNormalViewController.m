@@ -2,12 +2,13 @@
 //  TestNormalViewController.m
 //  test_WSTheme
 //
-//  Created by 王士良 on 2018/7/20.
-//  Copyright © 2018年 王士良. All rights reserved.
+//  Created by wsliang on 2018/7/20.
+//  Copyright © 2018年 wsliang. All rights reserved.
 //
 
 #import "TestNormalViewController.h"
 #import "WSTheme.h"
+#import "WSThemeExtension.h"
 
 @interface TestNormalViewController ()
 
@@ -15,6 +16,8 @@
 @property (weak, nonatomic) IBOutlet UILabel *textLabel;
 @property (weak, nonatomic) IBOutlet UIButton *btnNext;
 - (IBAction)actionNext:(UIButton *)sender;
+
+@property(nonatomic) BOOL stopLoop;
 
 @end
 
@@ -25,32 +28,26 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    _stopLoop = NO;
     testIndex = 0;
      [self addWSThemeControl];
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            // TODO:test
-        NSLog(@"==== 开始循环 调用切换  ====");
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            do {
-                NSLog(@"==== 执行一次 主题切换  ====");
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self actionNext:nil];
-                });
-                sleep(1);
-            } while (YES);
-        });
-    });
-    
 }
 
+-(void)dealloc
+{
+    NSLog(@"==== TestNormalViewController 垃圾回收 ====");
+    _stopLoop = YES;
+}
 
-
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    _stopLoop = YES;
+}
 
 -(void)addWSThemeControl
 {
-
         // 跟随主题切换更新一次.不需要返回的内容
     self.btnNext.theme.custom(nil, 0, ^(UIButton *item, id value) {
         item.tag ++;
@@ -127,6 +124,25 @@
 - (IBAction)actionNext:(UIButton *)sender
 {
     [self testChangeThemeModel];
+}
+
+- (IBAction)actionNextLoop:(UIButton *)sender
+{
+
+        // TODO:test
+    NSLog(@"==== 开始循环 调用切换  ====");
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        do {
+            if(weakSelf.stopLoop) break;
+            NSLog(@"==== 执行一次 主题切换  ====");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf actionNext:nil];
+            });
+            sleep(1);
+        } while (YES);
+    });
+
 }
 
 @end

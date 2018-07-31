@@ -2,8 +2,8 @@
 //  ViewController.m
 //  test_WSTheme
 //
-//  Created by 王士良 on 2018/7/20.
-//  Copyright © 2018年 王士良. All rights reserved.
+//  Created by wsliang on 2018/7/20.
+//  Copyright © 2018年 wsliang. All rights reserved.
 //
 
 #import "ViewController.h"
@@ -11,6 +11,8 @@
 #import "ThemeSelectViewController.h"
 
 #import "WSTheme.h"
+#import "WSThemeExtension.h"
+
 
 @interface ViewController ()
 
@@ -117,6 +119,14 @@
 }
 
 
+- (IBAction)testThemeSimple:(UIButton *)sender {
+
+    UIViewController *tempvc = [NSClassFromString(@"TestWSThemeSimpleViewController") new];
+    if (tempvc) {
+        [self.navigationController pushViewController:tempvc animated:YES];
+    }
+
+}
 
 
 @end

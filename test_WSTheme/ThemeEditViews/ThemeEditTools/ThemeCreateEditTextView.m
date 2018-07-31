@@ -2,8 +2,8 @@
 //  ThemeCreateEditTextView.m
 //  TestTheme_sakura
 //
-//  Created by 王士良 on 2018/7/4.
-//  Copyright © 2018年 王士良. All rights reserved.
+//  Created by wsliang on 2018/7/4.
+//  Copyright © 2018年 wsliang. All rights reserved.
 //
 
 #import "ThemeCreateEditTextView.h"

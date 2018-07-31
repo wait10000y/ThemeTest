@@ -2,7 +2,7 @@
 //  UIImage+YV_ColorImage.h
 //  yivian
 //
-//  Created by 王士良 on 2018/4/25.
+//  Created by wsliang on 2018/4/25.
 //  Copyright © 2018年 yivian. All rights reserved.
 //
 
