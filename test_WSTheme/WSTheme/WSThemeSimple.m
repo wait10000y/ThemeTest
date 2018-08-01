@@ -13,6 +13,16 @@
 #define WSThemeSimpleUpdateNotificaiton @"WSThemeSimpleUpdateNotificaiton"
 static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleTheme_objectPropertyKey";
 
+    //A better version of NSLog
+#define NSLog(format, ...) do {(NSLog)((format), ##__VA_ARGS__);} while (0)
+
+// 是否开启 线程队列模式.
+#define openUpdateThreadQueue 16 // 数值是可并行执行的线程数.
+
+#ifdef openUpdateThreadQueue
+static NSOperationQueue *updateQueue;
+#endif
+
 @implementation WSThemeSimple
 {
     NSMutableArray<NSString *> *mThemeNameList;
@@ -33,6 +43,13 @@ static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleThe
     // 加载默认的theme数据.
 -(void)loadDefaultThemeData
 {
+#ifdef openUpdateThreadQueue
+    if (!updateQueue) {
+        updateQueue = [[NSOperationQueue alloc] init];
+        updateQueue.maxConcurrentOperationCount = openUpdateThreadQueue;
+    }
+#endif
+
         // 读取 记录的themeModel模板数据.
     NSArray *cachedNmaeList = [[NSUserDefaults standardUserDefaults] objectForKey:WSThemeSimpleThemeListCachedKey];
     if ([cachedNmaeList isKindOfClass:[NSArray class]] && cachedNmaeList.count>0) {
@@ -82,6 +99,10 @@ static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleThe
     if (index == NSNotFound) {
         return NO;
     }
+
+#ifdef openUpdateThreadQueue
+    [updateQueue cancelAllOperations];
+#endif
     currentName = theName;
     [self saveCurrentThemeNameStatus];
     [[NSNotificationCenter defaultCenter] postNotificationName:WSThemeSimpleUpdateNotificaiton object:nil userInfo:nil];
@@ -156,17 +177,19 @@ static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleThe
 
     // 注册的block列表缓存.
     // key: valueBlock;value: identifier;
-@property(nonatomic) NSMutableSet *configBlockSet;
+//TODO: NSMutableSet set会去重~ 连续创建n个相同的(系统只创建一份),这里只能保存一个block. 如果有多次重复调用逻辑的可以改为 NSMutableArray使用.
+@property(nonatomic) NSMutableSet *customBlockList;
 
 @end
 
 @implementation WSThemeSimpleConfig
-
+{
+}
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _configBlockSet = [NSMutableSet new];
+        _customBlockList = [NSMutableSet new];
         _currentTheme = [WSThemeSimple sharedObject].currentThemeName;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(theme_ChangeModelNotify:) name:WSThemeSimpleUpdateNotificaiton object:nil];
     }
@@ -180,24 +203,35 @@ static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleThe
     NSLog(@"收到切换theme通知:%@",self);
     NSString *currentTheme = [WSThemeSimple sharedObject].currentThemeName;
     if (!_currentTheme || ![_currentTheme isEqual:currentTheme]) {
-        NSLog(@"开始更新对象:<%@:%lx>",NSStringFromClass(self.currentObject.class),(unsigned long)self.currentObject.hash);
+//        NSLog(@"开始更新对象:<%@:%lx>",NSStringFromClass(self.currentObject.class),(unsigned long)self.currentObject.hash);
         _currentTheme = currentTheme;
-        for (WSThemeSimpleConfigValueBlock valueBlock in _configBlockSet) {
+        NSLog(@"%@ 当前需要:%d个更新",self,_customBlockList.count);
+        for (WSThemeSimpleConfigValueBlock valueBlock in _customBlockList) {
+#ifdef openUpdateThreadQueue
+            __weak typeof(self) weakSelf = self;
+            [updateQueue addOperationWithBlock:^{
+                sleep(1);
+                valueBlock(weakSelf.currentObject,weakSelf.currentTheme);
+            }];
+#else
             valueBlock(_currentObject,_currentTheme);
+#endif
+
+
         }
     }
 }
 
 
     // 注册 更新theme的block回调
--(WSThemeSimpleConfigConfigBlock)custom
+-(WSThemeSimpleConfigCustomBlock)custom
 {
     __weak typeof(self) weakSelf = self;
     return ^(WSThemeSimpleConfigValueBlock valueBlock)
     {
         if (!valueBlock) {return weakSelf;}
             // 保存,identifier对应的 configblock
-        [weakSelf.configBlockSet addObject:valueBlock];
+        [weakSelf.customBlockList addObject:valueBlock];
             // 执行一次界面更新
         valueBlock(weakSelf.currentObject,weakSelf.currentTheme);
         return weakSelf;
@@ -208,7 +242,8 @@ static const NSString *WSThemeSimpleTheme_objectPropertyKey = @"WSThemeSimpleThe
 -(void)dealloc
 {
     NSLog(@"config 系统回收:%@",self);
-    [_configBlockSet removeAllObjects];
+//    [_customBlockList removeAllObjects];
+    _customBlockList = nil;
         //    [[NSNotificationCenter defaultCenter] removeObserver:self name:WSThemeChangingNotificaiton object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }

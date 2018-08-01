@@ -109,7 +109,9 @@
 
 // 设置图片样式.
     self.imgView.theme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
-        item.image = value;
+        if(value){
+            item.image = value;
+        }
     }).custom(@"imageView.background", WSThemeValueTypeColor, ^(UIImageView *item, UIColor *backColor) {
         item.backgroundColor = backColor;
     }).custom(@"imageView.defaultImage", WSThemeValueTypeImage, ^(UIImageView *item, UIImage *orginImage) {

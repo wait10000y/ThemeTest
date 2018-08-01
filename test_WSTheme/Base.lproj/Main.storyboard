@@ -68,43 +68,43 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="h8S-ET-aqO">
-                                <rect key="frame" x="16" y="74" width="343" height="200"/>
+                                <rect key="frame" x="16" y="74" width="343" height="120"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.25" translatesAutoresizingMaskIntoConstraints="NO" id="fzh-WK-vi4">
-                                        <rect key="frame" x="10" y="5" width="323" height="50"/>
+                                        <rect key="frame" x="10" y="5" width="323" height="46"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="50" id="FSS-u1-CRa"/>
+                                            <constraint firstAttribute="height" constant="46" id="FSS-u1-CRa"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fYB-PN-bTg">
-                                        <rect key="frame" x="139.5" y="93" width="64" height="64"/>
+                                        <rect key="frame" x="139.5" y="61" width="64" height="64"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="64" id="Urp-bc-r6y"/>
-                                            <constraint firstAttribute="width" constant="64" id="VeM-rY-vpR"/>
+                                            <constraint firstAttribute="height" constant="64" id="9ho-j8-F8Z"/>
+                                            <constraint firstAttribute="width" constant="64" id="uUL-Uc-QvQ"/>
                                         </constraints>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="0Rh-DJ-yY2"/>
-                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="centerY" secondItem="h8S-ET-aqO" secondAttribute="centerY" constant="25" id="GaZ-uB-5n1"/>
+                                    <constraint firstAttribute="height" constant="120" id="0Rh-DJ-yY2"/>
+                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="top" secondItem="fzh-WK-vi4" secondAttribute="bottom" constant="10" id="F5H-RL-gIe"/>
                                     <constraint firstAttribute="trailing" secondItem="fzh-WK-vi4" secondAttribute="trailing" constant="10" id="QFZ-rE-QaP"/>
                                     <constraint firstItem="fzh-WK-vi4" firstAttribute="leading" secondItem="h8S-ET-aqO" secondAttribute="leading" constant="10" id="Qgf-Ok-8xE"/>
                                     <constraint firstItem="fzh-WK-vi4" firstAttribute="top" secondItem="h8S-ET-aqO" secondAttribute="top" constant="5" id="UAh-f2-xG8"/>
-                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="centerX" secondItem="h8S-ET-aqO" secondAttribute="centerX" id="YTG-Ys-gGr"/>
+                                    <constraint firstItem="fYB-PN-bTg" firstAttribute="centerX" secondItem="h8S-ET-aqO" secondAttribute="centerX" id="ZCM-4q-BgZ"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tv6-Vl-5p5">
-                                <rect key="frame" x="16" y="294" width="343" height="108"/>
+                                <rect key="frame" x="16" y="214" width="343" height="108"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BVG-h0-CYf">
                                         <rect key="frame" x="100" y="32" width="140" height="44"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <state key="normal" title="主题列表"/>
+                                        <state key="normal" title="编辑主题"/>
                                         <connections>
                                             <action selector="actionShowThemeList:" destination="WVq-2F-YCV" eventType="touchUpInside" id="xH0-4V-1jB"/>
                                         </connections>
@@ -115,10 +115,14 @@
                                     <constraint firstAttribute="height" constant="108" id="fj5-Kz-2ia"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ZH-w8-pky">
-                                <rect key="frame" x="153" y="502" width="93" height="36"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="测试simple"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ZH-w8-pky">
+                                <rect key="frame" x="113" y="332" width="150" height="40"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="A2S-kK-kgM"/>
+                                    <constraint firstAttribute="height" constant="40" id="TQM-hr-Ynw"/>
+                                </constraints>
+                                <state key="normal" title="测试simple功能"/>
                                 <connections>
                                     <action selector="testThemeSimple:" destination="WVq-2F-YCV" eventType="touchUpInside" id="xvh-Ze-G0E"/>
                                 </connections>
@@ -126,16 +130,18 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="8ZH-w8-pky" firstAttribute="centerX" secondItem="44t-sC-AXK" secondAttribute="centerX" id="0al-2R-1kE"/>
                             <constraint firstItem="h8S-ET-aqO" firstAttribute="top" secondItem="2dE-HF-DN1" secondAttribute="bottom" constant="10" id="31E-81-FcX"/>
                             <constraint firstItem="h8S-ET-aqO" firstAttribute="leading" secondItem="44t-sC-AXK" secondAttribute="leadingMargin" id="DqP-2v-ytP"/>
                             <constraint firstItem="Tv6-Vl-5p5" firstAttribute="leading" secondItem="44t-sC-AXK" secondAttribute="leadingMargin" id="Qgv-rO-PK3"/>
                             <constraint firstItem="Tv6-Vl-5p5" firstAttribute="trailing" secondItem="44t-sC-AXK" secondAttribute="trailingMargin" id="cVi-Zg-MDv"/>
                             <constraint firstItem="h8S-ET-aqO" firstAttribute="trailing" secondItem="44t-sC-AXK" secondAttribute="trailingMargin" id="fXf-K0-GgI"/>
+                            <constraint firstItem="8ZH-w8-pky" firstAttribute="top" secondItem="Tv6-Vl-5p5" secondAttribute="bottom" constant="10" id="jv4-DB-FIs"/>
                             <constraint firstItem="Tv6-Vl-5p5" firstAttribute="top" secondItem="h8S-ET-aqO" secondAttribute="bottom" constant="20" id="ytJ-74-f4Z"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="ecL-Az-PQZ">
-                        <barButtonItem key="rightBarButtonItem" title="测试" id="eub-eF-HZn">
+                        <barButtonItem key="rightBarButtonItem" title="自动测试" id="eub-eF-HZn">
                             <connections>
                                 <action selector="actionToTestView:" destination="WVq-2F-YCV" id="mrA-pz-uW2"/>
                             </connections>

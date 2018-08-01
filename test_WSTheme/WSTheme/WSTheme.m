@@ -16,6 +16,9 @@
 #define WSThemeChangingNotificaiton @"WSThemeChangingNotificaiton"
 static const NSString *WSThemeConfig_objectPropertyKey = @"WSThemeConfig_objectPropertyKey";
 
+
+#define NSLog(format, ...) do {(NSLog)((format), ##__VA_ARGS__);} while (0)
+
 @implementation WSTheme
 {
     NSMutableArray<NSString *> *mThemeNameList;
