@@ -393,7 +393,7 @@ static const NSString *WSThemeConfig_objectPropertyKey = @"WSThemeConfig_objectP
 
 @implementation NSObject(WSTheme)
 
--(WSThemeConfig *)theme
+-(WSThemeConfig *)wsTheme
 {
     WSThemeConfig *config = objc_getAssociatedObject(self, &WSThemeConfig_objectPropertyKey);
     if (!config) {

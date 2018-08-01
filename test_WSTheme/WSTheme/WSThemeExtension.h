@@ -50,8 +50,6 @@ typedef WSThemeConfig *(^WSThemeConfigFixedTypeBlock)(NSString *identifier,WSThe
 @interface WSThemeModel(extension)
 
 
-
-
     // 获取原生值类型为WSThemeValueTypeOriginal; identifier 支持keyPath格式.
     // 当前线程执行;如果读取网络数据或耗时数据时,使用异步读取方法.
 -(id)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type;

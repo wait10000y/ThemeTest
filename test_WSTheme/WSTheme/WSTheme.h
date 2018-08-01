@@ -128,6 +128,6 @@ typedef WSThemeConfig *(^WSThemeConfigConfigBlock)(WSThemeConfigValueBlock);
 
 @interface NSObject(WSTheme)
 // 获取 监听文件.
--(WSThemeConfig *)theme;
+-(WSThemeConfig *)wsTheme;
 
 @end

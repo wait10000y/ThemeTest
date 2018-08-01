@@ -49,7 +49,7 @@
 -(void)addWSThemeControl
 {
         // 跟随主题切换更新一次.不需要返回的内容
-    self.btnNext.theme.custom(nil, 0, ^(UIButton *item, id value) {
+    self.btnNext.wsTheme.custom(nil, 0, ^(UIButton *item, id value) {
         item.tag ++;
         NSString *title = [NSString stringWithFormat:@"切换主题(%ld)",(long)item.tag];
         [item setTitle:title forState:UIControlStateNormal];
@@ -64,11 +64,11 @@
     });
 
 
-    self.view.theme.color(@"normal_backgroundColor", ^(UIView *item, UIColor *value) {
+    self.view.wsTheme.color(@"normal_backgroundColor", ^(UIView *item, UIColor *value) {
         item.backgroundColor = value;
     });
 
-    self.navigationController.navigationBar.theme.custom(@"navBarDefine.barTinColor",WSThemeValueTypeColor, ^(UINavigationBar *item, UIColor *value) {
+    self.navigationController.navigationBar.wsTheme.custom(@"navBarDefine.barTinColor",WSThemeValueTypeColor, ^(UINavigationBar *item, UIColor *value) {
         item.barTintColor = value;
 
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
@@ -90,7 +90,7 @@
 
     });
 
-    self.textLabel.theme.custom(@"textView.textFont", WSThemeValueTypeFont, ^(UILabel *item, UIFont *value) {
+    self.textLabel.wsTheme.custom(@"textView.textFont", WSThemeValueTypeFont, ^(UILabel *item, UIFont *value) {
         item.font = value;
     }).color(@"textView.textColor", ^(UILabel *item, UIColor *value) {
         item.textColor = value;
@@ -98,7 +98,7 @@
     });
 
 
-    self.imgView.theme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
+    self.imgView.wsTheme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
         item.image = value;
     }).custom(@"imageView.background", WSThemeValueTypeColor, ^(UIImageView *item, UIColor *backColor) {
         item.backgroundColor = backColor;
