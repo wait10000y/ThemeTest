@@ -11,7 +11,6 @@
 #import "ThemeSelectViewController.h"
 
 #import "WSTheme.h"
-#import "WSThemeExtension.h"
 
 
 @interface ViewController ()
@@ -60,7 +59,7 @@
         // 跟随主题切换更新一次.不需要返回的内容
     self.viewContent.wsTheme.custom(nil, 0, ^(UIButton *item, id value) {
             // 自定义 内容,跟随主题更新 刷新.
-        NSLog(@"=== 主题切换一次 ===");
+//        NSLog(@"=== 主题切换一次 ===");
         self.textLabel.text =[NSString stringWithFormat:@"当前主题:%@",[WSTheme sharedObject].currentThemeName?:@"测试"];
 
         // 自定义 读取主题的设置.

@@ -30,10 +30,10 @@
 		6B57D6102105E07C005157C4 /* UIView+YV_AlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B57D60D2105E07C005157C4 /* UIView+YV_AlertView.m */; };
 		6B57D6142106CA07005157C4 /* yivian.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B57D6122106CA07005157C4 /* yivian.json */; };
 		6B57D6152106CA07005157C4 /* yivian_tl.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B57D6132106CA07005157C4 /* yivian_tl.json */; };
-		6B621462210FFDA8003F23E0 /* WSThemeExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B621461210FFDA8003F23E0 /* WSThemeExtension.m */; };
 		6B621465211051F8003F23E0 /* WSThemeSimple.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B621464211051F8003F23E0 /* WSThemeSimple.m */; };
 		6B62146921105D9F003F23E0 /* TestWSThemeSimpleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B62146721105D9F003F23E0 /* TestWSThemeSimpleViewController.m */; };
 		6B62146A21105D9F003F23E0 /* TestWSThemeSimpleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6B62146821105D9F003F23E0 /* TestWSThemeSimpleViewController.xib */; };
+		6B62146D2111BFF6003F23E0 /* TestCoderObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B62146C2111BFF6003F23E0 /* TestCoderObject.m */; };
 		6B92DDFA2101EFFC00547839 /* testpic.png in Resources */ = {isa = PBXBuildFile; fileRef = 6B92DDF92101EFFC00547839 /* testpic.png */; };
 		6BADD2D020FEDE5700DCA870 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BADD2CF20FEDE5700DCA870 /* AppDelegate.m */; };
 		6BADD2D620FEDE5700DCA870 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6BADD2D420FEDE5700DCA870 /* Main.storyboard */; };
@@ -87,13 +87,13 @@
 		6B57D6112105E0C6005157C4 /* ThemeEditCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThemeEditCommon.h; sourceTree = "<group>"; };
 		6B57D6122106CA07005157C4 /* yivian.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = yivian.json; sourceTree = "<group>"; };
 		6B57D6132106CA07005157C4 /* yivian_tl.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = yivian_tl.json; sourceTree = "<group>"; };
-		6B621460210FFDA8003F23E0 /* WSThemeExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WSThemeExtension.h; sourceTree = "<group>"; };
-		6B621461210FFDA8003F23E0 /* WSThemeExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WSThemeExtension.m; sourceTree = "<group>"; };
 		6B621463211051F8003F23E0 /* WSThemeSimple.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WSThemeSimple.h; sourceTree = "<group>"; };
 		6B621464211051F8003F23E0 /* WSThemeSimple.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WSThemeSimple.m; sourceTree = "<group>"; };
 		6B62146621105D9F003F23E0 /* TestWSThemeSimpleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestWSThemeSimpleViewController.h; sourceTree = "<group>"; };
 		6B62146721105D9F003F23E0 /* TestWSThemeSimpleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestWSThemeSimpleViewController.m; sourceTree = "<group>"; };
 		6B62146821105D9F003F23E0 /* TestWSThemeSimpleViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TestWSThemeSimpleViewController.xib; sourceTree = "<group>"; };
+		6B62146B2111BFF6003F23E0 /* TestCoderObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestCoderObject.h; sourceTree = "<group>"; };
+		6B62146C2111BFF6003F23E0 /* TestCoderObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestCoderObject.m; sourceTree = "<group>"; };
 		6B92DDF92101EFFC00547839 /* testpic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testpic.png; sourceTree = "<group>"; };
 		6BADD2CB20FEDE5700DCA870 /* test_WSTheme.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test_WSTheme.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BADD2CE20FEDE5700DCA870 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -238,8 +238,8 @@
 				6B16868921096474008FAB20 /* default_tl.json */,
 				6BADD2E620FEDF8000DCA870 /* WSTheme.h */,
 				6BADD2E720FEDF8000DCA870 /* WSTheme.m */,
-				6B621460210FFDA8003F23E0 /* WSThemeExtension.h */,
-				6B621461210FFDA8003F23E0 /* WSThemeExtension.m */,
+				6B62146B2111BFF6003F23E0 /* TestCoderObject.h */,
+				6B62146C2111BFF6003F23E0 /* TestCoderObject.m */,
 			);
 			path = WSTheme;
 			sourceTree = "<group>";
@@ -328,6 +328,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B62146D2111BFF6003F23E0 /* TestCoderObject.m in Sources */,
 				6BBA4F902101C17C00C481BB /* ViewController.m in Sources */,
 				6B57D5FD2105DFFA005157C4 /* ThemeEditManager.m in Sources */,
 				6BBA4F8C2101BD8E00C481BB /* TestNormalViewController.m in Sources */,
@@ -345,7 +346,6 @@
 				6BADD2EC20FEE73D00DCA870 /* TestTableViewController.m in Sources */,
 				6B57D6102105E07C005157C4 /* UIView+YV_AlertView.m in Sources */,
 				6B57D5F92105DFFA005157C4 /* ThemeCreateHeaderView.m in Sources */,
-				6B621462210FFDA8003F23E0 /* WSThemeExtension.m in Sources */,
 				6BADD2DE20FEDE5900DCA870 /* main.m in Sources */,
 				6B16868E210AF3E4008FAB20 /* ThemeCreateEditEnumView.m in Sources */,
 				6B57D60E2105E07C005157C4 /* UIImage+YV_ColorImage.m in Sources */,

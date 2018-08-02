@@ -11,6 +11,8 @@
 #import "WSTheme.h"
 #import "TransDataUtils.h"
 
+#import "TestCoderObject.h"
+
 @interface AppDelegate ()
 
 @end
@@ -20,7 +22,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    UIFont *temp = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
+    UIFont *temp = [UIFont systemFontOfSize:20];
 
  NSNumber *num1 = [TransDataUtils parseNumberWithValue:@"12345"];
     NSNumber *num2 = [TransDataUtils performSelector:@selector(parseNumberWithValue:) withObject:@"56789"];
@@ -31,6 +33,24 @@
         // TODO:test
     NSLog(@"==== 默认字体:%@ , name:%@ ,fName:%@ ====",temp,temp.fontName,temp.familyName);
 
+
+
+
+    TestCoderObject *tc1 = [TestCoderObject new];
+    tc1.name = @"name123";
+    tc1.titles = @[@"title123"];
+
+//    TestCoderObject *tc2 = [TestCoderObject new];
+//    tc2.name = @"name456";
+//    tc2.titles = @[@"title456"];
+
+    NSData *arc1 = [NSKeyedArchiver archivedDataWithRootObject:tc1];
+
+    TestCoderObject *tempTc1 = [NSKeyedUnarchiver unarchiveObjectWithData:arc1];
+
+    NSLog(@"----tc1: name:%@, title:%@ ----",tempTc1.name,tempTc1.titles);
+
+
     [self loadWSThemeTestData];
 
     return YES;
@@ -39,12 +59,6 @@
 
 -(void)loadWSThemeTestData
 {
-    // 添加 默认主题
-    NSString *defaultName = WSThemeDefaultThemeName;
-    NSDictionary *jsonObject = [self loadResourceTheme:defaultName];
-    if (jsonObject) {
-        [[WSTheme sharedObject] addThemeJsonDictList:@[jsonObject] withNameList:@[defaultName]];
-    }
 
 // 添加其他主题.
     NSMutableArray *themeJsonList = [NSMutableArray new];

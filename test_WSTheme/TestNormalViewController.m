@@ -8,7 +8,8 @@
 
 #import "TestNormalViewController.h"
 #import "WSTheme.h"
-#import "WSThemeExtension.h"
+
+#define NSLog(format, ...) do {(NSLog)((format), ##__VA_ARGS__);} while (0)
 
 @interface TestNormalViewController ()
 
@@ -53,7 +54,8 @@
         item.tag ++;
         NSString *title = [NSString stringWithFormat:@"切换主题(%ld)",(long)item.tag];
         [item setTitle:title forState:UIControlStateNormal];
-
+        self.title = [WSTheme sharedObject].currentThemeName;
+        
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
         [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -73,9 +75,9 @@
 
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
         [cModel getDataWithIdentifier:@"navBarDefine.title" backType:WSThemeValueTypeJson complete:^(NSString *title) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.title = title;
-            });
+//            dispatch_async(dispatch_get_main_queue(), ^{
+//                self.title = title;
+//            });
         }];
 
         [cModel getDataWithIdentifier:@"navBarDefine.tinColor" backType:WSThemeValueTypeColor complete:^(UIColor *tinColor) {
@@ -99,13 +101,27 @@
 
 
     self.imgView.wsTheme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
-        item.image = value;
+        if(value){
+            item.image = value;
+        }
     }).custom(@"imageView.background", WSThemeValueTypeColor, ^(UIImageView *item, UIColor *backColor) {
         item.backgroundColor = backColor;
     }).custom(@"imageView.defaultImage", WSThemeValueTypeImage, ^(UIImageView *item, UIImage *orginImage) {
         item.image = orginImage;
     });
 
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+
+        for (int it=0; it<1000; it++) {
+            self.textLabel.wsTheme.custom(@"color.textColor", WSThemeValueTypeOriginal, ^(UILabel *item, NSString *value) {
+                NSString *nowStr = [NSString stringWithFormat:@"%@\t - %d\t",value,it];
+                NSLog(@"-- 更新调用:%@ --",nowStr);
+                item.text = nowStr;
+            });
+        }
+        NSLog(@"==== 注册完成 1000个 ====");
+    });
 
 }
 
