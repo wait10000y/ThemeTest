@@ -18,7 +18,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *btnNext;
 - (IBAction)actionNext:(UIButton *)sender;
 
-@property(nonatomic) BOOL stopLoop;
+@property(nonatomic) BOOL startLoop;
 
 @end
 
@@ -29,7 +29,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _stopLoop = NO;
+    _startLoop = YES;
     testIndex = 0;
      [self addWSThemeControl];
 
@@ -38,23 +38,25 @@
 -(void)dealloc
 {
     NSLog(@"==== TestNormalViewController 垃圾回收 ====");
-    _stopLoop = YES;
+    _startLoop = NO;
 }
 
 -(void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
-    _stopLoop = YES;
+    NSLog(@"==== TestNormalViewController viewDidDisappear ====");
+    _startLoop = NO;
 }
 
 -(void)addWSThemeControl
 {
+    __weak typeof(self) weakSelf = self;
         // 跟随主题切换更新一次.不需要返回的内容
     self.btnNext.wsTheme.custom(nil, 0, ^(UIButton *item, id value) {
         item.tag ++;
         NSString *title = [NSString stringWithFormat:@"切换主题(%ld)",(long)item.tag];
         [item setTitle:title forState:UIControlStateNormal];
-        self.title = [WSTheme sharedObject].currentThemeName;
+        weakSelf.title = [WSTheme sharedObject].currentThemeName;
         
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
         [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
@@ -150,15 +152,26 @@
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         do {
-            if(weakSelf.stopLoop) break;
             NSLog(@"==== 执行一次 主题切换  ====");
             dispatch_async(dispatch_get_main_queue(), ^{
                 [weakSelf actionNext:nil];
             });
             sleep(1);
-        } while (YES);
+        } while (weakSelf.startLoop);
+            // TODO:test
+        NSLog(@"==== 已停止循环 切换theme 调用 ====");
     });
 
 }
 
+
+
+
+
 @end
+
+
+
+
+
+
