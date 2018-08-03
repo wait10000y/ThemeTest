@@ -205,20 +205,20 @@ static NSOperationQueue *updateQueue;
     if (!_currentTheme || ![_currentTheme isEqual:currentTheme]) {
 //        NSLog(@"开始更新对象:<%@:%lx>",NSStringFromClass(self.currentObject.class),(unsigned long)self.currentObject.hash);
         _currentTheme = currentTheme;
-        NSLog(@"%@ 当前需要:%d个更新",self,_customBlockList.count);
-        for (WSThemeSimpleConfigValueBlock valueBlock in _customBlockList) {
+__weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            for (WSThemeSimpleConfigValueBlock valueBlock in weakSelf.customBlockList) {
+                if ([currentTheme isEqualToString:weakSelf.currentTheme]) {
 #ifdef openUpdateThreadQueue
-            __weak typeof(self) weakSelf = self;
-            [updateQueue addOperationWithBlock:^{
-                sleep(1);
-                valueBlock(weakSelf.currentObject,weakSelf.currentTheme);
-            }];
+                    [updateQueue addOperationWithBlock:^{
+                        valueBlock(weakSelf.currentObject,weakSelf.currentTheme);
+                    }];
 #else
-            valueBlock(_currentObject,_currentTheme);
+                    valueBlock(_currentObject,_currentTheme);
 #endif
-
-
-        }
+                }
+            }
+        });
     }
 }
 
@@ -242,9 +242,7 @@ static NSOperationQueue *updateQueue;
 -(void)dealloc
 {
     NSLog(@"config 系统回收:%@",self);
-//    [_customBlockList removeAllObjects];
     _customBlockList = nil;
-        //    [[NSNotificationCenter defaultCenter] removeObserver:self name:WSThemeChangingNotificaiton object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
