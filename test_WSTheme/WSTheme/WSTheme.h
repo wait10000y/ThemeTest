@@ -14,13 +14,36 @@
 2. model对象 支持原值,UIColor,UIFont,UIImage,Attributes类型取值. (attributes定义key 参考 NSAttributedString.h)
 3. 方法说明里分别指出 对象类型支持转换的格式. 用户可以取原值,自定义转换其他类型.
 
+格式定义：
+1. color支持形式(返回UIColor格式)：
+支持 0x,#或者直接写的三种格式十六进制的字符串. [0xffddffdd,#ffddffdd,ffddffdd], 八位时格式ARGB.六位时RGB.
+ 支持 NSNumber 类型, 该类型没有alpha项. 示例："0x00ff00" ， "#66DD2134" ， "2233FF"
+ 
+ 2. font支持形式(返回UIFont格式)：
+ NSNumber,NSSting:只有数字时，转成默认字体指定字号大小值;
+字符串":"分割格式时 "fontName:20":指定字体名称和字号大小,:分隔符; 示例:22 , 
+
+3. image支持形式(返回UIImage格式):
+ 支持的文件名类型: 支持bundle查找名称加载,本地路径加载,网络路径加载. 示例: "imgName" "imgName.jpg" "https://www.test.com/imgName.png"
+
+4.attribute支持形式（返回dict格式）：
+ 支持 NSAttributedString.h 定义的 attributeName字符串转换的key.
+ 对应的value值font,color类型自动转换,number,string使用原值,其他的属性暂不支持.
+
+5. json,或字符串 支持形式:
+ // 内容 转换成 json格式的字符串.无法转换时,自动调用 description属性返回内容.
+ 
+6. orginal 格式: 返回jsonDict定义时的原始值.
+
+
+
 {
     "defalut":{
         "示例key":"示例value,支持keypath多层嵌套定义.编辑部分支持两层嵌套编辑."
     },
 
     "navBarDefine":{
-        "title":"我是标题"
+        "title":"我是标题" 
         "tinColor":"0x00ff00",
         "barTinColor":"#66DD2134",
         "barTitleAttrs":{
@@ -119,6 +142,16 @@ void(^WSThemeConfigValueBlock)(id item , id value)
  item.textColor = value;
  item.text = [NSString stringWithFormat:@"主题:%@,颜色:%@",[WSTheme sharedObject].currentThemeName?:@"没有主题",value?:@"默认颜色"];
  });
+
+// 支持的所有调用方法：
+tempObj.custom(^);
+
+tempObj.original(^);
+tempObj.text(^);
+tempObj.color(^);
+tempObj.font(^);
+tempObj.image(^);
+tempObj.attribute(^);
 
 
  注意:
