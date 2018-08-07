@@ -12,6 +12,7 @@
 
 @property (weak, nonatomic) IBOutlet UIPickerView *pickerView;
 @property (weak, nonatomic) IBOutlet UILabel *showText;
+@property (weak, nonatomic) IBOutlet UIButton *systemFontBtn; // tag==0:使用自定义字体;是否使用系统字体.
 
 @property(nonatomic) NSArray *fontNameList; // 第一级 名称列表
 @property(nonatomic) NSMutableArray *fontFamilyList; // 次级列表列表
@@ -52,6 +53,19 @@
 }
 
 
+- (IBAction)actionTypeChanged:(UIButton *)sender {
+    BOOL isCustom = (sender.tag ==0);
+    NSString *title = isCustom?@"系统字体":@"自定义字体";
+    [sender setTitle:title forState:UIControlStateNormal];
+    sender.tag = isCustom?1:0;
+
+    if(isCustom){
+        _currentFont = [UIFont systemFontOfSize:_fontSize.floatValue];
+    }else{
+        _currentFont = [UIFont fontWithName:_fontName size:[_fontSize floatValue]];
+    }
+    self.showText.font = _currentFont;
+}
 
 -(id)getCurrentValue
 {
@@ -229,7 +243,11 @@
     _fontSize = _fontSizeList[cRow2];
     _fontName = _fontFamilyNameList[cRow1];
     if (_fontName && _fontSize) {
-        _currentFont = [UIFont fontWithName:_fontName size:[_fontSize floatValue]];
+        if(_systemFontBtn.tag == 0){
+            _currentFont = [UIFont fontWithName:_fontName size:[_fontSize floatValue]];
+        }else{
+            _currentFont = [UIFont systemFontOfSize:_fontSize.floatValue];
+        }
         self.showText.font = _currentFont;
     }
 }

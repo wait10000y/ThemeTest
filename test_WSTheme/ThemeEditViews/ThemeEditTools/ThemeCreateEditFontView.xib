@@ -43,8 +43,23 @@
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k5D-50-tSk">
+                            <rect key="frame" x="223" y="-2" width="72" height="26"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="26" id="8NF-ai-ute"/>
+                                <constraint firstAttribute="width" constant="72" id="ZPp-ur-nTd"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <state key="normal" title="自定义字体">
+                                <color key="titleColor" red="0.57919406890000003" green="0.1280144453" blue="0.57268613580000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </state>
+                            <connections>
+                                <action selector="actionTypeChanged:" destination="iN0-l3-epB" eventType="touchUpInside" id="SKt-7S-FWt"/>
+                            </connections>
+                        </button>
                     </subviews>
                     <constraints>
+                        <constraint firstAttribute="trailing" secondItem="k5D-50-tSk" secondAttribute="trailing" constant="5" id="5ck-JN-DAS"/>
                         <constraint firstItem="ydu-Dg-sKl" firstAttribute="top" secondItem="YYf-Te-7Rp" secondAttribute="top" id="88H-3i-cZU"/>
                         <constraint firstItem="5Ss-3b-UHX" firstAttribute="leading" secondItem="YYf-Te-7Rp" secondAttribute="leading" constant="5" id="9I6-ue-Ksu"/>
                         <constraint firstItem="rSE-58-O10" firstAttribute="leading" secondItem="YYf-Te-7Rp" secondAttribute="leading" id="AUb-HW-g9Q"/>
@@ -52,6 +67,7 @@
                         <constraint firstAttribute="bottom" secondItem="rSE-58-O10" secondAttribute="bottom" constant="20" id="MIW-TK-kFn"/>
                         <constraint firstAttribute="trailing" secondItem="ydu-Dg-sKl" secondAttribute="trailing" constant="5" id="XSs-Kj-T3G"/>
                         <constraint firstAttribute="bottom" secondItem="5Ss-3b-UHX" secondAttribute="bottom" constant="-10" id="cIX-9d-xYF"/>
+                        <constraint firstItem="k5D-50-tSk" firstAttribute="top" secondItem="YYf-Te-7Rp" secondAttribute="top" constant="-2" id="hTK-zb-HDE"/>
                         <constraint firstAttribute="trailing" secondItem="5Ss-3b-UHX" secondAttribute="trailing" constant="5" id="lft-Ce-KZ6"/>
                         <constraint firstItem="rSE-58-O10" firstAttribute="top" secondItem="YYf-Te-7Rp" secondAttribute="top" constant="18" id="tl1-Sz-PSI"/>
                         <constraint firstAttribute="trailing" secondItem="rSE-58-O10" secondAttribute="trailing" id="wIF-DL-Wpf"/>
