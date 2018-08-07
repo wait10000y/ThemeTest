@@ -194,6 +194,13 @@
 
 +(NSString *)parseFontStringWithValue:(UIFont *)value
 {
+    static UIFont *tempSystemFont=nil;
+    if (!tempSystemFont) {
+        tempSystemFont = [UIFont systemFontOfSize:12];
+    }
+    if ([tempSystemFont.fontName isEqualToString:value.fontName]) {
+        return (id)@(value.pointSize);
+    }
     return [NSString stringWithFormat:@"%@:%.0f",value.fontName,value.pointSize];
 }
 

@@ -13,7 +13,7 @@
 #import "WSTheme.h"
 
 
-@interface ViewController ()
+@interface ViewController ()<WSThemeChangeDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel *textLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *imgView;
@@ -33,9 +33,33 @@
     [super viewDidLoad];
     [self addWSThemeControl];
 
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"==== 打印线程为主线程 ====");
+    });
     self.title = @"测试";
 
+    static NSObject *testObject001;
+    if (!testObject001) {
+        testObject001 = [NSObject new];
+    }
+    NSLog(@"==== 1 testObject001 的属性是:%@ ====",testObject001);
+
 }
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[WSTheme sharedObject] addObserver:self forKeyPath:@"currentThemeName" options:NSKeyValueObservingOptionNew context:nil];
+    [[WSTheme sharedObject] addDelegate:self];
+}
+
+//-(void)viewWillDisappear:(BOOL)animated
+//{
+//    [super viewWillDisappear:animated];
+//    [[WSTheme sharedObject] removeObserver:self forKeyPath:@"currentThemeName"];
+//    [[WSTheme sharedObject] removeDelegate:self];
+//}
+
 
 // 主题列表 编辑界面
 -(IBAction)actionShowThemeList:(id)sender
@@ -50,6 +74,52 @@
     TestNormalViewController *testVC = [TestNormalViewController new];
     [self.navigationController pushViewController:testVC animated:YES];
 }
+
+
+// delegate回调方法.
+-(void)wsThemeHasChanged:(NSString *)themeName themeModel:(WSThemeModel *)themeModel {
+    NSLog(@"==== delegate模式 主题切换:%@ ====",themeName);
+
+    static NSObject *testObject001;
+    if (!testObject001) {
+        testObject001 = [NSObject new];
+    }
+    NSLog(@"==== 2 testObject001 的属性是:%@ ====",testObject001);
+
+    if ([themeName isEqualToString:[WSTheme sharedObject].currentThemeName]) {
+        //TODO: 更新.
+//            // 自定义 读取主题的设置.
+//        [themeModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+//            dispatch_async(dispatch_get_main_queue(), ^{
+//                [UIApplication sharedApplication].statusBarStyle = style.intValue; // 设定 状态条 颜色
+//            });
+//        }];
+    }
+}
+
+//KVO 监听属性.
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    NSLog(@"监听到属性变化:obj:%@ , keyPath:%@ , change.new:%@ , context:%@", object, keyPath, change[@"new"], context);
+    if(![@"currentThemeName" isEqualToString:keyPath]){
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
+        // object: WSTheme对象 change: {kind = 1,new = "theme2",old = "theme1"}
+    NSString *themeName = [change objectForKey:@"new"];
+    if (themeName && [themeName isEqualToString:[WSTheme sharedObject].currentThemeName]) {
+            //TODO: 更新.
+//            // 自定义 读取主题的设置.
+//        WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
+//        [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+//            dispatch_async(dispatch_get_main_queue(), ^{
+//                [UIApplication sharedApplication].statusBarStyle = style.intValue; // 设定 状态条 颜色
+//            });
+//        }];
+    }
+
+}
+
 
 
 // 添加 主题约束.
@@ -128,6 +198,8 @@
     }
 
 }
+
+
 
 
 @end

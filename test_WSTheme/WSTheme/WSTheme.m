@@ -318,6 +318,9 @@
 
 @interface WSTheme()
 @property(nonatomic) NSOperationQueue *updateQueue; // 线程队列(读取json配置数据,转化类型)
+@property(nonatomic) NSHashTable *delegateTable; // delegate列表.
+@property(nonatomic) NSHashTable *callBlockTable; // 事件队列.
+
 @end
 
 @implementation WSTheme
@@ -325,6 +328,7 @@
     NSMutableArray<NSString *> *mThemeNameList;
     NSString *currentName;
     WSThemeModel *currentModel;
+    NSLock *opLock;
 }
 
 +(instancetype)sharedObject
@@ -422,6 +426,45 @@
     return [NSArray arrayWithArray:mThemeNameList];
 }
 
+-(NSArray<WSThemeChangeDelegate> *)delegateList
+{
+    NSArray *tempArr;
+    @synchronized (_delegateTable) {
+        tempArr = [_delegateTable allObjects];
+    }
+    return (id)tempArr;
+}
+
+
+-(NSHashTable *)delegateTable
+{
+    if (!_delegateTable) {
+        _delegateTable = [NSHashTable weakObjectsHashTable];
+        _callBlockTable = [NSHashTable weakObjectsHashTable];
+        opLock = [NSLock new];
+    }
+    return _delegateTable;
+}
+
+-(void)addDelegate:(id<WSThemeChangeDelegate>)theDelegate
+{
+    if ([theDelegate conformsToProtocol:@protocol(WSThemeChangeDelegate)]) {
+        @synchronized (_delegateTable) {
+            [self.delegateTable addObject:theDelegate];
+        }
+        [theDelegate wsThemeHasChanged:currentName themeModel:currentModel];
+    }
+}
+
+-(void)removeDelegate:(id<WSThemeChangeDelegate>)theDelegate
+{
+    @synchronized (_delegateTable) {
+        if ([_delegateTable containsObject:theDelegate]) {
+            [_delegateTable removeObject:theDelegate];
+        }
+    }
+
+}
 
 -(BOOL)startTheme:(NSString *)theName
 {
@@ -434,12 +477,56 @@
         return NO;
     }
 
+//    [_updateQueue cancelAllOperations];
+    if (_callBlockTable.count>0) {
+        [opLock lock];
+        NSArray *tempOpList = [_callBlockTable allObjects];
+        [_callBlockTable removeAllObjects];
+        [opLock unlock];
+        for (NSOperation *tempOp in tempOpList) {
+            [tempOp cancel];
+        }
+    }
+
     NSLog(@"主题切换:%@ -> %@",currentName,theName);
+    [_updateQueue setSuspended:YES];
+
     currentName = theName;
     currentModel = [self themeModelForName:theName];
     [self saveCurrentThemeNameStatus];
 
+        // 消息推送
     [[NSNotificationCenter defaultCenter] postNotificationName:WSThemeUpdateNotificaiton object:nil userInfo:nil];
+
+    __weak typeof(self) weakSelf = self;
+    NSOperation *newOp = [NSBlockOperation blockOperationWithBlock:^{
+        [weakSelf willChangeValueForKey:@"currentThemeName"];
+        [weakSelf didChangeValueForKey:@"currentThemeName"];// KVO消息
+    }];
+    [opLock lock];
+    [_callBlockTable addObject:newOp];
+    [opLock unlock];
+    [[NSOperationQueue mainQueue] addOperation:newOp];
+
+    // delegate回调. 注意阻塞
+    NSArray *tempList;
+    @synchronized (_delegateTable) {
+        tempList = [_delegateTable allObjects];
+    }
+    if (tempList.count>0) {
+        NSString *tempName = currentName;
+        WSThemeModel *tempModel = currentModel;
+        for (id<WSThemeChangeDelegate> tempDelegate in tempList) {
+            NSOperation *newOp2 = [NSBlockOperation blockOperationWithBlock:^{
+                [tempDelegate wsThemeHasChanged:tempName themeModel:tempModel];
+            }];
+            [opLock lock];
+            [_callBlockTable addObject:newOp2];
+            [opLock unlock];
+            [[NSOperationQueue mainQueue] addOperation:newOp2];
+        }
+    }
+    [_updateQueue setSuspended:NO];
     return YES;
 }
 
@@ -502,6 +589,28 @@
     return YES;
 }
 
+
+// WSTheme/thmename
+//
+/**
+主题目录.
+ WSTheme/thmename/
+
+ WSTheme/thmename/default.json
+ WSTheme/thmename/default_tl.json
+  WSTheme/thmename/files/...
+ WSTheme/thmename/cached/keypath
+
+
+ // 当前主题 状态.
+ // array:所有主题,current:当前主题
+ {current:"theme1","themelist":["theme1","theme2"]}
+ WSTheme/theme.plist
+
+
+
+ */
+
     // ================= tools ================= 
 - (void)saveThemeNameListStatus{
     [[NSUserDefaults standardUserDefaults] setObject:mThemeNameList forKey:WSThemeListCachedKey];
@@ -521,8 +630,7 @@
     NSString *dataPath = [self themeObjectPathForName:key];
     NSFileManager *fm = [NSFileManager defaultManager];
     if (object) { // 添加或覆盖
-        NSData *objData = [NSKeyedArchiver archivedDataWithRootObject:object];
-        return [objData writeToFile:dataPath options:NSDataWritingAtomic error:nil];
+        return [NSKeyedArchiver archiveRootObject:object toFile:dataPath];
     }else{ // 删除
         if ([fm fileExistsAtPath:dataPath]) {
             return [fm removeItemAtPath:dataPath error:nil];
@@ -540,14 +648,31 @@
 
 - (NSString *)themeObjectPathForName:(NSString *)string
 {
-    NSString *basePath = [self themeMainPath];
+    NSString *basePath = [self themeMainPath:nil];
     return [basePath stringByAppendingPathComponent:string];
 }
 
-- (NSString *)themeMainPath
+
+
+// // 主题 json路径
+- (NSString *)themeJsonDictPathForName:(NSString *)string
+{
+    NSString *basePath = [self themeMainPath:string];
+    return [basePath stringByAppendingPathComponent:@"theme.json"];
+}
+
+// 主题 模板路径
+- (NSString *)themeTempleteDictPathForName:(NSString *)string
+{
+    NSString *basePath = [self themeMainPath:string];
+    return [basePath stringByAppendingPathComponent:@"theme_tl.json"];
+}
+
+// 主题主目录+themeName目录,传值nil返回主目录.
+- (NSString *)themeMainPath:(NSString *)themeName
 {
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-        path = [path stringByAppendingPathComponent:@"WSTheme"];
+    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"WSTheme/%@",themeName?:@""]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
         NSError *error;
         BOOL isOK = [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];

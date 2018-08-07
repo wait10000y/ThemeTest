@@ -148,7 +148,9 @@
         "title":"我是标题",
         "imgName":"test1"
     },
-
+    "color":{
+        "textColor":"66666666"
+    },
     "version":{
         "number":"1.0",
         "author":"wsliang",

@@ -33,7 +33,7 @@
 5. json,或字符串 支持形式:
  // 内容 转换成 json格式的字符串.无法转换时,自动调用 description属性返回内容.
  
-6. orginal 格式: 返回jsonDict定义时的原始值.
+6. orginal 格式: 返回jsonDict的原始值.
 
 
 
@@ -71,7 +71,53 @@
 **/
 
 /**
- 使用说明
+ 使用说明:
+支持 KVO属性监听,delegate通知,block注册三种形式更新主题.
+ 一. delegate形式:
+ 1. 需要随theme主题切换而更新的对象,实现协议:<WSThemeChangeDelegate> , 并登记对象:
+    [[WSTheme sharedObject] addDelegate:self];
+
+ 2. 该协议的下面实现方法会收到主题切换调用.调用线程为主线程.
+    // delegate回调方法.
+ -(void)wsThemeHasChanged:(NSString *)themeName themeModel:(WSThemeModel *)themeModel {
+    NSLog(@"==== delegate模式 主题切换:%@ ====",themeName);
+    if ([themeName isEqualToString:[WSTheme sharedObject].currentThemeName]) {
+        //TODO: 其他实现.
+        // 自定义 读取主题的设置.
+        [themeModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+            [UIApplication sharedApplication].statusBarStyle = style.intValue; // 设定 状态条 颜色
+        }];
+    }
+ }
+
+ 二. KVO属性监听形式:
+ 监听 WSTheme的 currentThemeName 属性.
+ 1.当前对象添加监听:
+    [[WSTheme sharedObject] addObserver:self forKeyPath:@"currentThemeName" options:NSKeyValueObservingOptionNew context:nil];
+
+ 2. 实现监听回调方法(调用线程为主线程):
+    //KVO 监听属性.
+ - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    NSLog(@"监听到属性变化:obj:%@ , keyPath:%@ , change.new:%@ , context:%@", object, keyPath, change[@"new"], context);
+    if(![@"currentThemeName" isEqualToString:keyPath]){
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
+     // object: WSTheme对象 change: {kind = 1,new = "theme2",old = "theme1"}
+     NSString *themeName = [change objectForKey:@"new"];
+     if (themeName && [themeName isEqualToString:[WSTheme sharedObject].currentThemeName]) {
+         // TODO: 其他实现.
+         // 自定义 读取主题的设置.
+         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
+         [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+            [UIApplication sharedApplication].statusBarStyle = style.intValue; // 设定 状态条 颜色
+         }];
+     }
+ }
+
+
+ 三. block注册形式:
  类对象:
  WSThemeModel,WSTheme,WSThemeConfig,NSObject(WSTheme);
 
@@ -79,9 +125,9 @@ WSThemeConfig 是 NSObject(WSTheme) 调用扩展方法后返回绑定的对象.�
 WSThemeConfig 可以注册各种theme更新的block. 书写方式类似jquery形式的调用接口方法.
 
  self.view.wsTheme.color(@"normal_backgroundColor", ^(UILabel *item, UIColor *value) {
- item.backgroundColor = value;
+    item.backgroundColor = value;
  }).font(@"normal_textFont", ^(UILabel *item, UIFont *value) {
- item.textFont = value;
+    item.textFont = value;
  });
 
  WSTheme 主题的主入口文件,维持各主题的生命周期.切换主题后,会发送切换通知到各 WSThemeConfig对象维持注册对象的更新回调;
@@ -128,7 +174,6 @@ void(^WSThemeConfigValueBlock)(id item , id value)
  // 跟随主题切换更新一次.不需要返回的内容
  self.btnNext.wsTheme.custom(nil, 0, ^(UIButton *item, id value) {
     NSString *title = [WSTheme sharedObject].currentThemeName;
-
     WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
     [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
         [UIApplication sharedApplication].statusBarStyle = style.intValue;
@@ -137,10 +182,10 @@ void(^WSThemeConfigValueBlock)(id item , id value)
 
  
  self.textLabel.wsTheme.custom(@"textView.textFont", WSThemeValueTypeFont, ^(UILabel *item, UIFont *value) {
- item.font = value;
+    item.font = value;
  }).color(@"textView.textColor", ^(UILabel *item, UIColor *value) {
- item.textColor = value;
- item.text = [NSString stringWithFormat:@"主题:%@,颜色:%@",[WSTheme sharedObject].currentThemeName?:@"没有主题",value?:@"默认颜色"];
+    item.textColor = value;
+    item.text = [NSString stringWithFormat:@"主题:%@,颜色:%@",[WSTheme sharedObject].currentThemeName?:@"没有主题",value?:@"默认颜色"];
  });
 
 // 支持的所有调用方法：
@@ -156,7 +201,7 @@ tempObj.attribute(^);
 
  注意:
  1. 注册回调的block中,使用弱引用来引用其他对象操作,防止循环引用(或间接循环引用)注册回调的对象,造成资源无法释放.
-2. 用户界面block回调已切换到主线程调用 ([NSOperationQueue mainQueue] 线程).
+ 2. 用户界面block回调已切换到主线程调用 ([NSOperationQueue mainQueue] 线程).
 
  */
 
@@ -175,7 +220,6 @@ typedef enum : NSUInteger {
 
     WSThemeValueTypeNone,// 保留类型
 } WSThemeValueType;
-
 
 
 #define WSThemeDefaultThemeName @"default" // 对应 default.json 配置.
@@ -225,18 +269,29 @@ typedef enum : NSUInteger {
 @end
 
 
+@class WSTheme;
+@protocol WSThemeChangeDelegate<NSObject>
+
+@required
+-(void)wsThemeHasChanged:(NSString *)themeName themeModel:(WSThemeModel *)themeModel;
+
+@end
+
 // 主程序.
 @interface WSTheme : NSObject
+    // 可使用kvo监听该属性变化.
+@property(nonatomic,copy,readonly) NSString *currentThemeName; // 当前主题名称.
+@property(nonatomic,readonly) WSThemeModel *currentThemeModel; // 当前主题对应的model. 当主题列表为空时,返回一个临时的WSThemeModel.
+@property(nonatomic,readonly) NSArray<NSString *> *themeNameList; // 所有主题
+@property(nonatomic,readonly) NSArray<WSThemeChangeDelegate> *delegateList; // 添加的delegate列表.
+
 
 +(WSTheme *)sharedObject;
 
-// 所有主题
--(NSArray<NSString *> *)themeNameList;
+// 添加主题切换监听,弱引用,id对象消失时,列表中会自动删除该对象.
+-(void)addDelegate:(id<WSThemeChangeDelegate>)theDelegate;
+-(void)removeDelegate:(id<WSThemeChangeDelegate>)theDelegate;
 
--(NSString *)currentThemeName;
-
-// 当主题列表为空时,返回一个临时的WSThemeModel.
--(WSThemeModel *)currentThemeModel;
 -(WSThemeModel *)themeModelForName:(NSString *)themeName; // themeName是已添加的主题,其他值返回nil;
 -(NSDictionary *)themeJsonDictForName:(NSString *)themeName; // 返回 定义json的object对象.
 
