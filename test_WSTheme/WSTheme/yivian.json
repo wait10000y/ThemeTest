@@ -134,26 +134,13 @@
     },
 
 
-    "导航条设置":{
-        "导航条按钮颜色":"#37474F",
-        "导航条背景颜色": "#ffF2A1",
-        "导航条标题样式": {
-            "NSForegroundColorAttributeName": "#37FF80",
-            "NSFontAttributeName": 16
-        }
-    },
-
-    "global":{
-        "statusBarStyle":"UIStatusBarStyleLightContent",
-        "title":"我是标题",
-        "imgName":"test1"
-    },
     "color":{
         "textColor":"66666666"
     },
     "version":{
-        "number":"1.0",
-        "author":"wsliang",
+        "name": "默认主题",
+        "desc": "主题描述",
+        "author": "作者",
         "date":"2018.06"
     }
 }

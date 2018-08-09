@@ -29,11 +29,11 @@
     "textView.textFont":{"name":"字体样式","desc":"字体样式描述","order":2,"type":"font","default":"SFUIDisplay-Bold:22"},
 
 
-    "_info":{"name":"主题附加信息","desc":"主题附加信息描述","order":10,"type":"node"},
-    "_info.name":{"name":"主题名称","desc":"主题名称描述","order":1,"type":"text","default":"默认主题"},
-    "_info.desc":{"name":"主题描述","desc":"主题描述描述","order":2,"type":"text","default":"主题描述"},
-    "_info.author":{"name":"作者","desc":"作者描述","order":3,"type":"text","default":"作者"},
-    "_info.date":{"name":"创作时间","desc":"创作时间描述","order":4,"type":"text","default":"2018.06"}
+    "version":{"name":"主题附加信息","desc":"主题附加信息描述","order":101,"type":"node"},
+    "version.name":{"name":"主题名称","desc":"主题名称描述","order":1,"type":"text","default":"默认主题"},
+    "version.desc":{"name":"主题描述","desc":"主题描述描述","order":2,"type":"text","default":"主题描述"},
+    "version.author":{"name":"作者","desc":"作者描述","order":3,"type":"text","default":"作者"},
+    "version.date":{"name":"创作时间","desc":"创作时间描述","order":4,"type":"text","default":"2018.06"}
 
 
 }

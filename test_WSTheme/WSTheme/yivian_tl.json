@@ -1,76 +1,68 @@
 
-
-
 {
 
-    "contentView":{"name":"详情界面","key":"contentView","type":0,"order":10,"value":""},
-    "contentView.backGroundColor":{"name":"背景颜色","key":"backGroundColor","type":1,"order":1,"value":"#37474F"},
-    "contentView.alertTextColor":{"name":"列表框文字颜色","key":"alertTextColor","type":1,"order":2,"value":"#37474F"},
-    "contentView.alertTextFont":{"name":"列表框文字大小","key":"alertTextFont","type":3,"order":3,"value":"14"},
-    "contentView.alertBackBroundColor":{"name":"列表框背景颜色","key":"alertBackBroundColor","type":1,"order":4,"value":"#37474F"},
+    "contentView":{"name":"详情界面","type":"node","order":10},
+    "contentView.backGroundColor":{"name":"背景颜色","desc":"backGroundColor","type":"color","order":1,"default":"#37474F"},
+    "contentView.alertTextColor":{"name":"列表框文字颜色","desc":"alertTextColor","type":"color","order":2,"default":"#37474F"},
+    "contentView.alertTextFont":{"name":"列表框文字大小","desc":"alertTextFont","type":"font","order":3,"default":"14"},
+    "contentView.alertBackBroundColor":{"name":"列表框背景颜色","desc":"alertBackBroundColor","type":"color","order":4,"default":"#37474F"},
 
 
 
-    "tabBar":{"name":"底部导航条","key":"tabBar","type":0,"order":1,"value":""},
-    "tabBar.barBarTintColor":{"name":"bar背景颜色","key":"barBarTintColor","type":1,"order":1,"value":"#37474F"},
-    "tabBar.barBackGroundColor":{"name":"背景颜色","key":"barBackGroundColor","type":1,"order":2,"value":"#37474F"},
-    "tabBar.bar1Color":{"name":"资讯bar颜色","key":"bar1Color","type":1,"order":3,"value":"#37474F"},
-    "tabBar.bar1tintColor":{"name":"资讯bar选中颜色","key":"bar1tintColor","type":1,"order":4,"value":"#37474F"},
-    "tabBar.bar2Color":{"name":"推荐bar颜色","key":"bar2Color","type":1,"order":5,"value":"#37474F"},
-    "tabBar.bar2tintColor":{"name":"推荐bar选中颜色","key":"bar2tintColor","type":1,"order":6,"value":"#37474F"},
-    "tabBar.bar3Color":{"name":"收藏bar颜色","key":"bar3Color","type":1,"order":1,"value":"#37474F"},
-    "tabBar.bar3tintColor":{"name":"收藏bar选中颜色","key":"bar3tintColor","type":1,"order":7,"value":"#37474F"},
-    "tabBar.bar4Color":{"name":"设置bar颜色","key":"bar4Color","type":1,"order":1,"value":"#37474F"},
-    "tabBar.bar4tintColor":{"name":"设置bar选中颜色","key":"bar4tintColor","type":1,"order":8,"value":"#37474F"},
+    "tabBar":{"name":"底部导航条","type":"node","order":1},
+    "tabBar.barBarTintColor":{"name":"bar背景颜色","desc":"barBarTintColor","type":"color","order":1,"default":"#37474F"},
+    "tabBar.barBackGroundColor":{"name":"背景颜色","desc":"barBackGroundColor","type":"color","order":2,"default":"#37474F"},
+    "tabBar.bar1Color":{"name":"资讯bar颜色","desc":"bar1Color","type":"color","order":3,"default":"#37474F"},
+    "tabBar.bar1tintColor":{"name":"资讯bar选中颜色","desc":"bar1tintColor","type":"color","order":4,"default":"#37474F"},
+    "tabBar.bar2Color":{"name":"推荐bar颜色","desc":"bar2Color","type":"color","order":5,"default":"#37474F"},
+    "tabBar.bar2tintColor":{"name":"推荐bar选中颜色","desc":"bar2tintColor","type":"color","order":6,"default":"#37474F"},
+    "tabBar.bar3Color":{"name":"收藏bar颜色","desc":"bar3Color","type":"color","order":1,"default":"#37474F"},
+    "tabBar.bar3tintColor":{"name":"收藏bar选中颜色","desc":"bar3tintColor","type":"color","order":7,"default":"#37474F"},
+    "tabBar.bar4Color":{"name":"设置bar颜色","desc":"bar4Color","type":"color","order":1,"default":"#37474F"},
+    "tabBar.bar4tintColor":{"name":"设置bar选中颜色","desc":"bar4tintColor","type":"color","order":8,"default":"#37474F"},
 
 
 
-    "categoryView":{"name":"资讯列表界面","key":"categoryView","type":0,"order":3,"value":""},
-    "categoryView.backgroundColor":{"name":"背景颜色","key":"backgroundColor","type":1,"order":1,"value":"#37474F"},
-    "categoryView.navbarBarTinColor":{"name":"导航背景颜色","key":"navbarBarTinColor","type":1,"order":2,"value":"#37474F"},
-    "categoryView.navbarTinColor":{"name":"导航按钮颜色","key":"navbarTinColor","type":1,"order":3,"value":"#37474F"},
-    "categoryView.navbarTitleStyle":{"name":"导航标题样式","key":"navbarTitleStyle","type":6,"order":4,"value":"","dictValues":{
-        "NSForegroundColorAttributeName": {"name":"字体颜色","key":"NSForegroundColorAttributeName","type":"color","order":5,"value":"#37FF80"},
-        "NSFontAttributeName": {"name":"字体大小","key":"NSFontAttributeName","type":"number","order":2,"value":20},
-    }},
-    "categoryView.categoryTextColorNormal":{"name":"分类标题颜色","type":1,"order":6,"value":"#37474F"},
-    "categoryView.categoryTFontNorml":{"name":"分类标题字体","type":3,"order":7,"value":"18"},
-    "categoryView.categoryTextColorSelected":{"name":"分类标题选中颜色","type":1,"order":8,"value":"#37474F"},
-    "categoryView.categoryTFontSelected":{"name":"分类标题选中字体","type":3,"order":9,"value":"19"},
-    "categoryView.cellSeparatorColor":{"name":"列表分割线颜色","type":1,"order":10,"value":"#37474F"},
-    "categoryView.cellBGColor":{"name":"列表背景颜色","type":1,"order":11,"value":"#37474F"},
-    "categoryView.cellTitleColor":{"name":"列表标题颜色","type":1,"order":12,"value":"#37474F"},
-    "categoryView.cellTitleFont":{"name":"列表标题字体","type":3,"order":13,"value":"19"},
-    "categoryView.cellSubTitleColor":{"name":"列表副标题颜色","type":1,"order":14,"value":"#37474F"},
-    "categoryView.cellSubTitleFont":{"name":"列表副标题字体","type":3,"order":15,"value":"19"},
-    "categoryView.cellCategoryTitleColor":{"name":"列表分类颜色","type":1,"order":16,"value":"#37474F"},
-    "categoryView.cellCategoryTitleFont":{"name":"列表分类字体","type":3,"order":17,"value":"19"},
-    "categoryView.cellAuthorTitleColor":{"name":"列表作者颜色","type":1,"order":18,"value":"#37474F"},
-    "categoryView.cellAuthorTitleFont":{"name":"列表作者字体","type":3,"order":19,"value":"19"},
-    "categoryView.cellTimeTitleColor":{"name":"列表时间颜色","type":1,"order":20,"value":"#37474F"},
-    "categoryView.cellTimeTitleFont":{"name":"列表时间字体","type":3,"order":21,"value":"19"},
-    "categoryView.cellIconAlpha":{"name":"列表图标透明度","type":7,"order":22,"value":"0.8","enumValues":{"透明度0.5":"0.5","不透明":"1"}},
+    "categoryView":{"name":"资讯列表界面","desc":"categoryView","type":"node","order":3},
+    "categoryView.backgroundColor":{"name":"背景颜色","desc":"backgroundColor","type":"color","order":1,"default":"#37474F"},
+    "categoryView.navbarBarTinColor":{"name":"导航背景颜色","desc":"navbarBarTinColor","type":"color","order":2,"default":"#37474F"},
+    "categoryView.navbarTinColor":{"name":"导航按钮颜色","desc":"navbarTinColor","type":"color","order":3,"default":"#37474F"},
+    "categoryView.navbarTitleStyle":{"name":"导航标题样式","desc":"navbarTitleStyle","type":"dict","order":4,"default":{"NSForegroundColorAttributeName":"#37FF80","NSFontAttributeName":20}},
+    "categoryView.categoryTextColorNormal":{"name":"分类标题颜色","type":"color","order":6,"default":"#37474F"},
+    "categoryView.categoryTFontNorml":{"name":"分类标题字体","type":"font","order":7,"default":"18"},
+    "categoryView.categoryTextColorSelected":{"name":"分类标题选中颜色","type":"color","order":8,"default":"#37474F"},
+    "categoryView.categoryTFontSelected":{"name":"分类标题选中字体","type":"font","order":9,"default":"19"},
+    "categoryView.cellSeparatorColor":{"name":"列表分割线颜色","type":"color","order":10,"default":"#37474F"},
+    "categoryView.cellBGColor":{"name":"列表背景颜色","type":"color","order":11,"default":"#37474F"},
+    "categoryView.cellTitleColor":{"name":"列表标题颜色","type":"color","order":12,"default":"#37474F"},
+    "categoryView.cellTitleFont":{"name":"列表标题字体","type":"font","order":13,"default":"19"},
+    "categoryView.cellSubTitleColor":{"name":"列表副标题颜色","type":"color","order":14,"default":"#37474F"},
+    "categoryView.cellSubTitleFont":{"name":"列表副标题字体","type":"font","order":15,"default":"19"},
+    "categoryView.cellCategoryTitleColor":{"name":"列表分类颜色","type":"color","order":16,"default":"#37474F"},
+    "categoryView.cellCategoryTitleFont":{"name":"列表分类字体","type":"font","order":17,"default":"19"},
+    "categoryView.cellAuthorTitleColor":{"name":"列表作者颜色","type":"color","order":18,"default":"#37474F"},
+    "categoryView.cellAuthorTitleFont":{"name":"列表作者字体","type":"font","order":19,"default":"19"},
+    "categoryView.cellTimeTitleColor":{"name":"列表时间颜色","type":"color","order":20,"default":"#37474F"},
+    "categoryView.cellTimeTitleFont":{"name":"列表时间字体","type":"font","order":21,"default":"19"},
+    "categoryView.cellIconAlpha":{"name":"列表图标透明度","type":"text","order":22,"default":"0.8","enums":{"透明度0.5":"0.5","不透明":"1"}},
 
 
-    "导航条设置":{"name":"导航条设置","key":"导航条设置","type":0,"order":102,"value":""},
+    "导航条设置":{"name":"导航条设置","desc":"导航条设置","type":"node","order":102},
 
-    "导航条设置.导航条按钮颜色":{"name":"导航条按钮颜色","key":"导航条按钮颜色","type":1,"order":1,"value":"#37474F"},
-    "导航条设置.导航条背景颜色":{"name":"导航条背景颜色","key":"导航条背景颜色","type":1,"order":2,"value":"#ffF2A1"},
-    "导航条设置.导航条标题样式":{"name":"导航条标题样式","key":"导航条标题样式","type":6,"order":3,"value":"","dictValues":{
-        "NSForegroundColorAttributeName": {"name":"字体颜色","key":"NSForegroundColorAttributeName","type":"color","order":1,"value":"#37FF80"},
-        "NSFontAttributeName": {"name":"字体大小","key":"NSFontAttributeName","type":"number","order":2,"value":20},
-    }},
+    "导航条设置.导航条按钮颜色":{"name":"导航条按钮颜色","desc":"导航条按钮颜色","type":"color","order":1,"default":"#37474F"},
+    "导航条设置.导航条背景颜色":{"name":"导航条背景颜色","desc":"导航条背景颜色","type":"color","order":2,"default":"#ffF2A1"},
+    "导航条设置.导航条标题样式":{"name":"导航条标题样式","desc":"导航条标题样式","type":"dict","order":3,"default":{"NSForegroundColorAttributeName":"#37FF80","NSFontAttributeName":20}},
 
 
-    "global":{"name":"全局设置","key":"global","type":0,"order":101,"value":""},
-    "global.statusBarStyle": {"name":"主界状态栏状态","key":"statusBarStyle","type":7,"order":1,"value":"UIStatusBarStyleLightContent","enumValues":{"白色状态条":"UIStatusBarStyleLightContent","黑色状态条":"UIStatusBarStyleDefault"}},
-    "global.imgName": {"name":"主界面icon","key":"imgName","type":4,"order":3,"value":"test1"},
-    "global.title":{"name":"主界面标题","key":"title","type":2,"order":2,"value":"我是标题"},
+    "global":{"name":"全局设置","desc":"global","type":"node","order":101},
+    "global.statusBarStyle": {"name":"主界状态栏状态","desc":"statusBarStyle","type":"num","order":1,"default":1,"enums":{"白色状态条":1,"黑色状态条":2}},
+    "global.imgName": {"name":"主界面icon","desc":"imgName","type":"text","order":3,"default":"test1"},
+    "global.title":{"name":"主界面标题","desc":"title","type":"text","order":2,"default":"我是标题"},
 
-    "version":{"name":"版本信息","key":"version","type":0,"order":104,"value":""},
-    "version.number":{"name":"版本号","key":"number","type":2,"order":1,"value":"1.0"},
-    "version.author":{"name":"作者","key":"author","type":2,"order":2,"value":"wsliang"},
-    "version.date":{"name":"日期","key":"date","type":2,"order":3,"value":"2018.06"}
+    "version":{"name":"版本信息","desc":"version","type":"node","order":104},
+    "version.number":{"name":"版本号","desc":"number","type":"text","order":1,"default":"1.0"},
+    "version.author":{"name":"作者","desc":"author","type":"text","order":2,"default":"wsliang"},
+    "version.date":{"name":"日期","desc":"date","type":"text","order":3,"default":"2018.06"}
 
 }
 
