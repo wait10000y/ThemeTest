@@ -22,33 +22,49 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    UIFont *temp = [UIFont systemFontOfSize:20];
+//    UIFont *temp = [UIFont systemFontOfSize:20];
+//
+// NSNumber *num1 = [TransDataUtils parseNumberWithValue:@"12345"];
+//    NSNumber *num2 = [TransDataUtils performSelector:@selector(parseNumberWithValue:) withObject:@"56789"];
+//
+//    NSLog(@"==== num1:%@ , num2:%@ ====",num1,num2);
+//
+//
+//        // TODO:test
+//    NSLog(@"==== 默认字体:%@ , name:%@ ,fName:%@ ====",temp,temp.fontName,temp.familyName);
+//
+//
+//
+//
+//    TestCoderObject *tc1 = [TestCoderObject new];
+//    tc1.name = @"name123";
+//    tc1.titles = @[@"title123"];
+//
+////    TestCoderObject *tc2 = [TestCoderObject new];
+////    tc2.name = @"name456";
+////    tc2.titles = @[@"title456"];
+//
+//    NSData *arc1 = [NSKeyedArchiver archivedDataWithRootObject:tc1];
+//
+//    TestCoderObject *tempTc1 = [NSKeyedUnarchiver unarchiveObjectWithData:arc1];
+//
+//    NSLog(@"----tc1: name:%@, title:%@ ----",tempTc1.name,tempTc1.titles);
 
- NSNumber *num1 = [TransDataUtils parseNumberWithValue:@"12345"];
-    NSNumber *num2 = [TransDataUtils performSelector:@selector(parseNumberWithValue:) withObject:@"56789"];
-
-    NSLog(@"==== num1:%@ , num2:%@ ====",num1,num2);
 
 
-        // TODO:test
-    NSLog(@"==== 默认字体:%@ , name:%@ ,fName:%@ ====",temp,temp.fontName,temp.familyName);
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    path = [path stringByAppendingPathComponent:@"/test1/test2.plist"];
 
 
+    BOOL isOK = NO;
+    NSData *tempData = [NSKeyedArchiver archivedDataWithRootObject:@"我是一个字符串123456"];
+    isOK = [[NSFileManager defaultManager] createFileAtPath:path contents:tempData attributes:nil];
+//    if(![[NSFileManager defaultManager] fileExistsAtPath:path]){
+//    }
 
+//    BOOL isOK = [NSKeyedArchiver archiveRootObject:@"我是一个字符串123456" toFile:path];
 
-    TestCoderObject *tc1 = [TestCoderObject new];
-    tc1.name = @"name123";
-    tc1.titles = @[@"title123"];
-
-//    TestCoderObject *tc2 = [TestCoderObject new];
-//    tc2.name = @"name456";
-//    tc2.titles = @[@"title456"];
-
-    NSData *arc1 = [NSKeyedArchiver archivedDataWithRootObject:tc1];
-
-    TestCoderObject *tempTc1 = [NSKeyedUnarchiver unarchiveObjectWithData:arc1];
-
-    NSLog(@"----tc1: name:%@, title:%@ ----",tempTc1.name,tempTc1.titles);
+    NSLog(@"==== 写文件是否成功:%d ====",isOK);
 
 
     [self loadWSThemeTestData];

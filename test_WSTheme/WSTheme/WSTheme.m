@@ -653,31 +653,74 @@
 }
 
 
-
-// // 主题 json路径
-- (NSString *)themeJsonDictPathForName:(NSString *)string
+// =================== 目录工具 ===================
+// 删除一个主题的所有文件和目录.
+-(BOOL)removeThemeFilesWithName:(NSString *)themeName
 {
-    NSString *basePath = [self themeMainPath:string];
-    return [basePath stringByAppendingPathComponent:@"theme.json"];
+    [self themeMainPath:themeName isAutoCreate:NO isClear:YES];
+    return YES;
 }
 
-// 主题 模板路径
-- (NSString *)themeTempleteDictPathForName:(NSString *)string
+    // 主题列表保存路径
+- (NSString *)themeListDataPath
 {
-    NSString *basePath = [self themeMainPath:string];
+    NSString *basePath = [self themeMainPath:nil];
+    return [basePath stringByAppendingPathComponent:@"themeList.json"];
+}
+
+    // 当前主题保存路径
+- (NSString *)themeCurrentDataPath
+{
+    NSString *basePath = [self themeMainPath:nil];
+    return [basePath stringByAppendingPathComponent:@"currentTheme.json"];
+}
+
+// // 主题 cache路径(大文件等)
+- (NSString *)themeDataCachePathForName:(NSString *)themeName fileName:(NSString *)fileName
+{
+    NSString *basePath = [self themeMainPath:themeName];
+    return [basePath stringByAppendingPathComponent:[NSString stringWithFormat:@"cache/%@",fileName?:@""]];
+}
+
+// 主题 json路径
+- (NSString *)themeJsonDictPathForName:(NSString *)themeName
+{
+    NSString *basePath = [self themeMainPath:themeName];
+    return [basePath stringByAppendingPathComponent:@"theme.json"];
+}
+// 主题 模板路径
+- (NSString *)themeTempleteDictPathForName:(NSString *)themeName
+{
+    NSString *basePath = [self themeMainPath:themeName];
     return [basePath stringByAppendingPathComponent:@"theme_tl.json"];
 }
 
-// 主题主目录+themeName目录,传值nil返回主目录.
 - (NSString *)themeMainPath:(NSString *)themeName
+{
+    return [self themeMainPath:themeName isAutoCreate:YES isClear:NO];
+}
+
+// 主题主目录+themeName目录,传值nil返回主目录.
+// isCreate 是否自动创建不存在的目录.
+// isClear 是否清空已存在的文件.
+- (NSString *)themeMainPath:(NSString *)themeName isAutoCreate:(BOOL)isCreate isClear:(BOOL)isClear
 {
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
     path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"WSTheme/%@",themeName?:@""]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        NSError *error;
-        BOOL isOK = [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];
-        if (!isOK) {
-            path = nil;
+    if (isCreate) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if (![fm fileExistsAtPath:path]) {
+            [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+        }else if(isClear){
+            [fm removeItemAtPath:path error:nil];
+            if(![fm fileExistsAtPath:path]){
+                [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+            }
+        }
+    }else if (isClear){
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:path]) {
+            [fm removeItemAtPath:path error:nil];
         }
     }
     return path;
