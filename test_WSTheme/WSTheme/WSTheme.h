@@ -72,12 +72,13 @@
 
 /**
  使用说明:
-支持 KVO属性监听,delegate通知,block注册三种形式更新主题.
- 一. delegate形式:
- 1. 需要随theme主题切换而更新的对象,实现协议:<WSThemeChangeDelegate> , 并登记对象:
+支持 KVO属性监听,delegate委托模式,block注册(Notification通知模式实现的)三种形式更新主题.
+
+ 一. delegate委托模式:
+ 1. 需要随theme主题切换而更新的对象,实现协议:<WSThemeChangeDelegate> , 并登记对象(登记的对象是弱引用,不改变delegate对象的生命周期,delegate被垃圾回收时,自动被删除引用的):
     [[WSTheme sharedObject] addDelegate:self];
 
- 2. 该协议的下面实现方法会收到主题切换调用.调用线程为主线程.
+ 2. delegate<WSThemeChangeDelegate>委托对象实现下面的方法,主题切换时会被调用.调用线程为主线程.
     // delegate回调方法.
  -(void)wsThemeHasChanged:(NSString *)themeName themeModel:(WSThemeModel *)themeModel {
     NSLog(@"==== delegate模式 主题切换:%@ ====",themeName);
@@ -89,6 +90,9 @@
         }];
     }
  }
+ 
+ 3. delegate<WSThemeChangeDelegate> 中途取消委托,可以调用下面方法,如果该delegate对象丢弃不用,可以不调用下面取消方法,该对象会自动被移除引用.
+ -(void)removeDelegate:(id<WSThemeChangeDelegate>)theDelegate;
 
  二. KVO属性监听形式:
  监听 WSTheme的 currentThemeName 属性.
