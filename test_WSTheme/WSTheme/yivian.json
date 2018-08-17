@@ -137,6 +137,11 @@
     "color":{
         "textColor":"66666666"
     },
+    "imageView":{
+        "background":"#EE22CC",
+        "defaultImage":"testpic.png",
+        "orginImage":"http://cdn.cocimg.com/bbs/images/face/none.gif"
+    },
     "version":{
         "name": "默认主题",
         "desc": "主题描述",

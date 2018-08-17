@@ -7,9 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class ThemeEditItemModel;
 @interface ThemeEditManager : NSObject
+
+// 设置不可修改删除的主题列表.
++(void)setSystemThemeNames:(NSArray<NSString *> *)themeNameList;
+//设置默认的主题编辑模板.
++(void)setThemeTemplateDefault:(NSDictionary *)theTemplate;
 
 // theme主题列表(namelist)
 +(NSArray *)themeNameListSystem;
@@ -23,8 +29,7 @@
 
 +(BOOL)removeThemeWithName:(NSString *)themeName;
     // 保存 新theme主题.
-+(BOOL)saveNewTheme:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList withName:(NSString *)newName;
-
++(BOOL)saveNewTheme:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList withName:(NSString *)newName  hasPackage:(BOOL)hasPackage;
 
 
 // 获取 对应theme的定义模板.
@@ -32,6 +37,8 @@
     // 获取 对应theme的json定义dict
 +(NSDictionary *)definedDictForTheme:(NSString *)themeName;
 
++(NSString *)themeMainPathWithName:(NSString *)themeName;
+//+(NSString *)themeResourcePathForTheme:(NSString *)themeName withFileName:(NSString *)fileName;
 
 // 解析指定名称(themeName)theme的jsonDict内容.返回 ThemeEditItemModel的二级数组.
 /**
@@ -44,10 +51,22 @@
  */
 +(BOOL)parseThemeEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> **)itemList titleList:(NSArray<ThemeEditItemModel *> **)titleList forTheme:(NSString *)themeName;
 
+// 解析成主题jsonDict对象,保存使用.
++(NSDictionary *)parseThemeJsonDictFromEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList;
 
 
 
 
+// --- fileUtils ---
+
++(NSString *)newThemeCacheMainPath:(BOOL)needClear; // 复制目录到此时,需要删除原目录.
++(NSString *)newThemeCacheResourcePath:(NSString *)fileName; // 获取指定资源文件路径
+
++(BOOL)newThemeCacheSaveJsonDict:(NSDictionary *)theJsonDict; // 添加主题定义文件.
+
++(BOOL)newThemeCacheSaveResource:(NSData *)theData forFileName:(NSString *)fileName; // 添加资源
++(NSData *)newThemeCacheGetResourceWithFileName:(NSString *)fileName; // 获取资源
++(BOOL)newThemeCacheRemoveResourceWithFileName:(NSString *)fileName; // 删除资源
 
 @end
 
@@ -78,7 +97,7 @@
  必须定义字段:type,如果没有type值:默认type==none,内容全部文本编辑形式;
 "global":{"name":"全局设置","desc":"描述信息","keypath":"global","order":101,"type":6,"default":"","enums":{"描述1":"value1","描述2":"value2"}},
 
- type: color,text,image,font,num,dict,node 字符显示.
+ type: color,text,image,font,data,num,dict,node 字符显示.
  value: nsstring,nsnumber,nsdictionary
 
  */
@@ -90,9 +109,10 @@ typedef enum : NSUInteger { // 排序不可混乱.
     ThemeEditItemTypeText, // text类型, 或者无法识别的类型.
     ThemeEditItemTypeFont, // 数字:表示系统字体;{"name":"","size":20}:表示定义字体名称.
     ThemeEditItemTypeImage, // 图片名称,本地路径,url地址等.
+    ThemeEditItemTypeData, // data类型的资源内容. 配置名称和image类型相同.
     ThemeEditItemTypeNumber, //
     ThemeEditItemTypeDict, //
-//    ThemeEditItemTypeEnum, // 枚举类型 模板里有枚举数据.
+//    ThemeEditItemTypeEnum, // 枚举类型 模板里有枚举数据. 可以是上面所有类型的枚举.
 } ThemeEditItemType;
 
 
@@ -104,6 +124,7 @@ typedef enum : NSUInteger { // 排序不可混乱.
 @property(nonatomic) NSString *type; // 数据类型.
 @property(nonatomic) id defalut; // 默认值.
 @property(nonatomic) NSDictionary *enums; // enum类型的选项,有该字段表示值只可选择此列表; key:name , value:原始值的对象包装 string,number
+@property(nonatomic) id attachs; // 其他附加值,自定义附加值.
 
 // 编辑时附加字段
 @property(nonatomic) id value; // 值,修改时改这里.保存时,保存该值.
@@ -122,6 +143,22 @@ typedef enum : NSUInteger { // 排序不可混乱.
 +(ThemeEditItemType)parseItemType:(NSString *)typeStr;
 +(NSString *)getItemTypeStr:(ThemeEditItemType)type;
 
+
+// utils
+-(UIColor *)createColor;
+-(UIFont *)createFont;
+-(NSString *)createJsonText;
+-(UIImage *)createImage;
+-(NSData *)createData;
+-(NSDictionary *)createAttributes;
+
+    // 反向转换数据. image,data数据保存到对应主题资源目录下,返回值为name名称.
+-(NSString *)parseColor:(UIColor *)theColor;
+-(NSString *)parseFont:(UIFont *)theFont;
+-(NSString *)parseImage:(UIImage *)theImage withName:(NSString *)theName; // name:保存是value值,文件名称,url地址等.
+-(NSString *)parseData:(NSData *)theData withName:(NSString *)theName;
+-(NSDictionary *)parseAttributes:(NSDictionary *)theAttributes; // 转存成描述性的字典对象.
+-(id)parseJsonText:(NSString *)theJsonText; // 转成json对象格式.
 
 @end
 

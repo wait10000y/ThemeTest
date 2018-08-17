@@ -200,6 +200,7 @@ tempObj.text(^);
 tempObj.color(^);
 tempObj.font(^);
 tempObj.image(^);
+ tempObj.data(^);
 tempObj.attribute(^);
 
 
@@ -214,68 +215,25 @@ tempObj.attribute(^);
 #import <UIKit/UIKit.h>
 
 
+extern NSNotificationName const WSThemeUpdateNotificaiton;
+
+
 typedef enum : NSUInteger {
-    WSThemeValueTypeOriginal = 0, // 原始值.
+    WSThemeValueTypeOriginal = 0, // json对象的原始值.
     WSThemeValueTypeJson, // json格式字符串.
     WSThemeValueTypeColor,
-    WSThemeValueTypeImage,
     WSThemeValueTypeFont,
     WSThemeValueTypeAttribute,// 属性字典.
-
     WSThemeValueTypeNone,// 保留类型
+
+    WSThemeValueTypeImage,
+    WSThemeValueTypeData,
+
 } WSThemeValueType;
 
 
-#define WSThemeDefaultThemeName @"default" // 对应 default.json 配置.
-
-
-    // 模板对象 唯一标记 name
-@interface WSThemeModel:NSObject
-@property(readonly, copy) NSString *name; // 名称 (theme name)
-
-    // 创建方式.
-+(instancetype)createWithJsonDict:(NSDictionary *)jsonDict withName:(NSString *)theName;
-
-
-    // 获取原生值类型为WSThemeValueTypeOriginal; identifier 支持keyPath格式.
-    // 当前线程执行;如果读取网络数据或耗时数据时,使用异步读取方法.
--(id)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type;
-    // 异步读取数据. complete线程为:NSOperationQueue线程池线程. model是当前对象(可能为空).
--(void)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type complete:(void(^)(id value))complete;
-
-    // utils
-/**
- 默认匹配转换. 支持 0x,#或者直接写的三种格式十六进制的字符串. [0xffddffdd,#ffddffdd,ffddffdd], 八位时格式ARGB.六位时RGB.
- 支持 NSNumber 类型, 该类型没有alpha项.
- */
--(UIColor *)createColor:(NSString *)colorValue;
-
-/**
- NSNumber,NSSting:默认字体指定字号大小值;
- "fontName:20":指定字体名称和字号大小,:分隔符;
- */
--(UIFont *)createFont:(NSString *)fontValue;
-
-    // 内容 转换成 json格式的字符串.
--(NSString *)createJsonText:(id)value;
-/**
- 支持的文件名类型:
- "imgName" "imgName.jpg" "https://www.test.com/imgName.png"
- */
--(UIImage *)createImage:(NSString *)imgValue;
-
-/**
- 支持 NSAttributedString.h 定义的 attributeName字符串转换的key.
- 对应的value值font,color类型自动转换,number,string使用原值,其他的属性暂不支持.
- */
--(NSDictionary *)createAttributes:(NSDictionary *)attrsValue;
-
-@end
-
-
-@class WSTheme;
+@class WSTheme,WSThemeModel;
 @protocol WSThemeChangeDelegate<NSObject>
-
 @required
 -(void)wsThemeHasChanged:(NSString *)themeName themeModel:(WSThemeModel *)themeModel;
 
@@ -283,34 +241,83 @@ typedef enum : NSUInteger {
 
 // 主程序.
 @interface WSTheme : NSObject
-    // 可使用kvo监听该属性变化.
+    // 可使用kvo监听该属性变化. 注意数据同步问题:在切换主题后,注册属性监听时,需自主更新一次.
 @property(nonatomic,copy,readonly) NSString *currentThemeName; // 当前主题名称.
 @property(nonatomic,readonly) WSThemeModel *currentThemeModel; // 当前主题对应的model. 当主题列表为空时,返回一个临时的WSThemeModel.
 @property(nonatomic,readonly) NSArray<NSString *> *themeNameList; // 所有主题
-@property(nonatomic,readonly) NSArray<WSThemeChangeDelegate> *delegateList; // 添加的delegate列表.
 
-
+// 单例模式 未处理其他形式创建对象.
 +(WSTheme *)sharedObject;
-
-// 添加主题切换监听,弱引用,id对象消失时,列表中会自动删除该对象.
--(void)addDelegate:(id<WSThemeChangeDelegate>)theDelegate;
--(void)removeDelegate:(id<WSThemeChangeDelegate>)theDelegate;
-
--(WSThemeModel *)themeModelForName:(NSString *)themeName; // themeName是已添加的主题,其他值返回nil;
--(NSDictionary *)themeJsonDictForName:(NSString *)themeName; // 返回 定义json的object对象.
 
 
 // 切换新主题.
 -(BOOL)startTheme:(NSString *)theName;
 
-    // 同名称的主题会被新主题覆盖更新;不同名称的主题执行添加主题更新. override
--(BOOL)addThemeJsonDictList:(NSArray<NSDictionary *> *)dictList withNameList:(NSArray<NSString *> *)nameList;
+    // 同名称的主题会被新主题覆盖更新;不同名称的主题执行添加主题更新. override,返回更新或添加的个数.
+-(int)addThemeWithJsonDictList:(NSArray<NSDictionary *> *)dictList withNameList:(NSArray<NSString *> *)nameList;
+// 同名称的主题会被新主题覆盖更新;
+-(int)addThemeWithPackageList:(NSArray<NSString *> *)packagePathList withThemeNamList:(NSArray<NSString *> *)themeNameList;
+    // 设置编辑模板 jsonDict. themeName为空时保存全局模板.
+-(BOOL)setThemeTemplateDict:(NSDictionary *)theDict forName:(NSString *)themeName;
+
+//删除一个主题,主题文件夹一并删除.不可删除正在使用的主题.
 -(BOOL)removeThemes:(NSArray<NSString *> *)nameList;
 
--(BOOL)clearCacheData;
+-(WSThemeModel *)themeModelForName:(NSString *)themeName; // themeName是已添加的主题,其他值返回没有jsonDict等资源的model对象;
+
+// +======+ delegate 委托模式 +======+
+@property(nonatomic,readonly) NSArray<WSThemeChangeDelegate> *delegateList; // 添加的delegate列表.
+
+// 注意数据同步问题:在切换主题后,添加委托对象时,需自主更新一次.
+-(void)addDelegate:(id<WSThemeChangeDelegate>)theDelegate;
+-(void)removeDelegate:(id<WSThemeChangeDelegate>)theDelegate;
+
+
+// 传空值时清理全部缓存
+-(BOOL)clearCacheData:(NSArray *)themeNameList;
 
 @end
 
+
+
+    // 模板对象 唯一标记 name
+@interface WSThemeModel:NSObject
+@property(readonly, copy) NSString *name; // 名称 (theme name)
+@property(readonly, copy) NSString *desc; // 描述信息 (json.vision.desc)
+
+    // 创建方式. theName 主题名称;资源已存在的创建方式.
++(instancetype)createWithName:(NSString *)theName;
+// 读取资源. 也可直接重载成 themeName的主题内容.
+-(BOOL)loadThemeDataWithName:(NSString *)themeName;
+
+// 返回当前theme定义的jsonDict内容.
+-(NSDictionary *)themeJsonDict; // 主题定义内容
+-(NSDictionary *)themeTemplateDict; // 主题模板
+-(NSString *)themePackagePath; // 主题主目录.
+
+
+    // 获取identifier对应的值
+-(id)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type;
+    // 异步获取identifier对应的值
+-(void)getDataWithIdentifier:(NSString *)identifier backType:(WSThemeValueType)type complete:(void(^)(id value))complete;
+
+    // utils
+-(UIColor *)createColor:(NSString *)colorValue;
+-(UIFont *)createFont:(NSString *)fontValue;
+-(NSString *)createJsonText:(id)value;
+-(UIImage *)createImage:(NSString *)imgValue;
+-(NSData *)createData:(NSString *)theDataName;
+-(NSDictionary *)createAttributes:(NSDictionary *)attrsValue;
+
+    // 反向转换数据. image,data数据保存到对应主题资源目录下,返回值为name名称.
+-(NSString *)parseColor:(UIColor *)theColor;
+-(NSString *)parseFont:(UIFont *)theFont;
+-(NSString *)parseImage:(UIImage *)theImage withName:(NSString *)theName; // name:保存是value值,文件名称,url地址等.
+-(NSString *)parseData:(NSData *)theData withName:(NSString *)theName;
+-(NSDictionary *)parseAttributes:(NSDictionary *)theAttributes; // 转存成描述性的字典对象.
+-(id)parseJsonText:(NSString *)theJsonText; // 转成json对象格式.
+
+@end
 
 
 
@@ -319,7 +326,6 @@ typedef enum : NSUInteger {
  item:注册对象;
  value:根据identifier,valueType查找转换的数据结果值.
  */
-
 typedef void(^WSThemeConfigValueBlock)(id item , id value);
 
 /**
@@ -328,27 +334,23 @@ typedef void(^WSThemeConfigValueBlock)(id item , id value);
  valueBlock 返回结果block回调;
  */
 typedef WSThemeConfig *(^WSThemeConfigCustomBlock)(NSString *identifier,WSThemeValueType valueType,WSThemeConfigValueBlock valueBlock);
-
     // 直接指定返回值类型.
 typedef WSThemeConfig *(^WSThemeConfigFixedTypeBlock)(NSString *identifier,WSThemeConfigValueBlock valueBlock);
-
-
-    //TODO: 简洁调用,仅随着theme切换而调用.
-typedef WSThemeConfig *(^WSThemeConfigMarkBlock)(void(^)(id item));
 
 
 @interface WSThemeConfig:NSObject
 
 // block, WSThemeConfigValueBlock内容在主线程更新.
-@property(nonatomic,copy,readonly) WSThemeConfigCustomBlock custom;
+@property(nonatomic,copy,readonly) WSThemeConfigCustomBlock custom; // 自定义格式,nil空调用等.
 
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock original; // 原始值
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock text; // jsonText,description
-
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock color; // UIColor
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock font; // UIFont
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock image; // UIImage,nil
+@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock data; // NSData,nil
 @property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock attribute; // dict
+
 @end
 
 
@@ -357,3 +359,4 @@ typedef WSThemeConfig *(^WSThemeConfigMarkBlock)(void(^)(id item));
 -(WSThemeConfig *)wsTheme;
 
 @end
+

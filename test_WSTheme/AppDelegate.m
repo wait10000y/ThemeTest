@@ -9,8 +9,7 @@
 #import "AppDelegate.h"
 
 #import "WSTheme.h"
-#import "TransDataUtils.h"
-
+#import "ThemeEditManager.h"
 #import "TestCoderObject.h"
 
 @interface AppDelegate ()
@@ -52,7 +51,7 @@
 
 
 
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     path = [path stringByAppendingPathComponent:@"/test1/test2.plist"];
 
 
@@ -79,11 +78,25 @@
 // 添加其他主题.
     NSMutableArray *themeJsonList = [NSMutableArray new];
     NSMutableArray *themeNameList = [NSMutableArray new];
-    for (int it=0; it<3; it++) {
+
+    NSArray *tempImages = @[
+                            @"https://avatar.csdn.net/B/F/B/1_red_stone1.jpg",
+                        @"http://cdn.cocimg.com/assets/img/logo.png?v=201510272",
+                        @"http://top.cocoachina.com/uploads/20180731/63aebd0110cc696f39607b146040b0b3.png",
+                        @"http://top.cocoachina.com/uploads/20180806/c62d8f3b818687a8316e115868a7fbb1.jpg",
+                        @"http://top.cocoachina.com/uploads/20180713/c42d320a6df48d93130e9ee3ab1c1b97.jpg",
+                        ];
+    for (int it=0; it<tempImages.count; it++) {
         NSDictionary *themeJson = @{
                                     @"color":@{
                                             @"textColor":@(arc4random())
-                                            }
+                                            },
+                                    @"imageView":@{
+                                        @"background":@(arc4random()),
+                                        @"defaultImage":@"testpic.png",
+                                        @"orginImage":tempImages[it]
+                                    },
+                                    @"normal_backgroundColor":@(arc4random()),
                                     };
 
         NSString *tName = [NSString stringWithFormat:@"测试model%d",it+1];
@@ -91,17 +104,29 @@
         [themeJsonList addObject:themeJson];
         [themeNameList addObject:tName];
     }
-    [[WSTheme sharedObject] addThemeJsonDictList:themeJsonList withNameList:themeNameList];
+    [[WSTheme sharedObject] addThemeWithJsonDictList:themeJsonList withNameList:themeNameList];
 
-// 添加其他主题.
+
+// 添加其他默认主题.
+    NSDictionary *defaultObject = [self loadResourceTheme:@"default"];
     NSDictionary *yivianObject = [self loadResourceTheme:@"yivian"];
-    if (yivianObject) {
-        [[WSTheme sharedObject] addThemeJsonDictList:@[yivianObject] withNameList:@[@"yivian"]];
+    if (defaultObject && yivianObject) {
+        [[WSTheme sharedObject] addThemeWithJsonDictList:@[defaultObject,yivianObject] withNameList:@[@"默认主题",@"yivian主题"]];
     }
 
+    // 为主题添加模板定义文件.
+    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"default_tl"] forName:@"默认主题"];
+    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"yivian_tl"] forName:@"yivian主题"];
+    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"default_tl"] forName:nil]; // 全局默认模板
+
     // 指定加载默认主题.
-    NSString *lastName = [WSTheme sharedObject].currentThemeName?:WSThemeDefaultThemeName;
+    NSString *lastName = [WSTheme sharedObject].currentThemeName?:@"默认主题";
     [[WSTheme sharedObject] startTheme:lastName];
+
+    // 编辑时,不可删除,修改的主题.
+    [ThemeEditManager setSystemThemeNames:@[@"默认主题",@"yivian主题"]];
+    // 编辑时,加载默认模板.
+    [ThemeEditManager setThemeTemplateDefault:[self loadResourceTheme:@"default_tl"]];
 
 }
 

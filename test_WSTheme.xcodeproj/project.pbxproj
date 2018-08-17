@@ -10,7 +10,8 @@
 		6B16868A21096474008FAB20 /* default_tl.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B16868921096474008FAB20 /* default_tl.json */; };
 		6B16868E210AF3E4008FAB20 /* ThemeCreateEditEnumView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B16868D210AF3E4008FAB20 /* ThemeCreateEditEnumView.m */; };
 		6B168690210AF457008FAB20 /* ThemeCreateEditEnumView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6B16868F210AF457008FAB20 /* ThemeCreateEditEnumView.xib */; };
-		6B168693210B0869008FAB20 /* TransDataUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B168692210B0869008FAB20 /* TransDataUtils.m */; };
+		6B2D4543212417A300AAC0C5 /* SSImagePickerHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B2D4540212417A200AAC0C5 /* SSImagePickerHelper.m */; };
+		6B2D4544212417A300AAC0C5 /* UIImage+FixOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B2D4542212417A200AAC0C5 /* UIImage+FixOrientation.m */; };
 		6B57D5F92105DFFA005157C4 /* ThemeCreateHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B57D5E02105DFFA005157C4 /* ThemeCreateHeaderView.m */; };
 		6B57D5FA2105DFFA005157C4 /* ThemeCreateHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6B57D5E12105DFFA005157C4 /* ThemeCreateHeaderView.xib */; };
 		6B57D5FB2105DFFA005157C4 /* ThemeCreateViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B57D5E32105DFFA005157C4 /* ThemeCreateViewController.m */; };
@@ -53,8 +54,10 @@
 		6B16868C210AF3E4008FAB20 /* ThemeCreateEditEnumView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThemeCreateEditEnumView.h; sourceTree = "<group>"; };
 		6B16868D210AF3E4008FAB20 /* ThemeCreateEditEnumView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ThemeCreateEditEnumView.m; sourceTree = "<group>"; };
 		6B16868F210AF457008FAB20 /* ThemeCreateEditEnumView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ThemeCreateEditEnumView.xib; sourceTree = "<group>"; };
-		6B168691210B0869008FAB20 /* TransDataUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TransDataUtils.h; sourceTree = "<group>"; };
-		6B168692210B0869008FAB20 /* TransDataUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TransDataUtils.m; sourceTree = "<group>"; };
+		6B2D453F212417A200AAC0C5 /* SSImagePickerHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSImagePickerHelper.h; sourceTree = "<group>"; };
+		6B2D4540212417A200AAC0C5 /* SSImagePickerHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSImagePickerHelper.m; sourceTree = "<group>"; };
+		6B2D4541212417A200AAC0C5 /* UIImage+FixOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FixOrientation.h"; sourceTree = "<group>"; };
+		6B2D4542212417A200AAC0C5 /* UIImage+FixOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FixOrientation.m"; sourceTree = "<group>"; };
 		6B57D5DF2105DFFA005157C4 /* ThemeCreateHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThemeCreateHeaderView.h; sourceTree = "<group>"; };
 		6B57D5E02105DFFA005157C4 /* ThemeCreateHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThemeCreateHeaderView.m; sourceTree = "<group>"; };
 		6B57D5E12105DFFA005157C4 /* ThemeCreateHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ThemeCreateHeaderView.xib; sourceTree = "<group>"; };
@@ -126,6 +129,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6B2D453E212417A200AAC0C5 /* SSImagePickerHelper */ = {
+			isa = PBXGroup;
+			children = (
+				6B2D453F212417A200AAC0C5 /* SSImagePickerHelper.h */,
+				6B2D4540212417A200AAC0C5 /* SSImagePickerHelper.m */,
+				6B2D4541212417A200AAC0C5 /* UIImage+FixOrientation.h */,
+				6B2D4542212417A200AAC0C5 /* UIImage+FixOrientation.m */,
+			);
+			path = SSImagePickerHelper;
+			sourceTree = "<group>";
+		};
 		6B57D5DB2105DFFA005157C4 /* ThemeEditViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -141,8 +155,6 @@
 				6B57D5E42105DFFA005157C4 /* ThemeCreateViewController.xib */,
 				6B57D5E52105DFFA005157C4 /* ThemeEditManager.h */,
 				6B57D5E62105DFFA005157C4 /* ThemeEditManager.m */,
-				6B168691210B0869008FAB20 /* TransDataUtils.h */,
-				6B168692210B0869008FAB20 /* TransDataUtils.m */,
 				6B57D5E72105DFFA005157C4 /* ThemeEditTools */,
 			);
 			path = ThemeEditViews;
@@ -173,6 +185,7 @@
 		6B57D6072105E07C005157C4 /* AlertView */ = {
 			isa = PBXGroup;
 			children = (
+				6B2D453E212417A200AAC0C5 /* SSImagePickerHelper */,
 				6B57D6082105E07C005157C4 /* UIImage+YV_ColorImage.h */,
 				6B57D6092105E07C005157C4 /* UIImage+YV_ColorImage.m */,
 				6B57D60A2105E07C005157C4 /* UIView+Toast.h */,
@@ -335,8 +348,8 @@
 				6B57D5FB2105DFFA005157C4 /* ThemeCreateViewController.m in Sources */,
 				6B57D6022105DFFA005157C4 /* ThemeCreateEditTextView.m in Sources */,
 				6BADD2E920FEDF8000DCA870 /* WSTheme.m in Sources */,
+				6B2D4543212417A300AAC0C5 /* SSImagePickerHelper.m in Sources */,
 				6B57D5FE2105DFFA005157C4 /* ThemeCreateEditColorView.m in Sources */,
-				6B168693210B0869008FAB20 /* TransDataUtils.m in Sources */,
 				6B62146921105D9F003F23E0 /* TestWSThemeSimpleViewController.m in Sources */,
 				6B57D60F2105E07C005157C4 /* UIView+Toast.m in Sources */,
 				6B57D6042105DFFA005157C4 /* ThemeCreateEditToolAlertController.m in Sources */,
@@ -349,6 +362,7 @@
 				6BADD2DE20FEDE5900DCA870 /* main.m in Sources */,
 				6B16868E210AF3E4008FAB20 /* ThemeCreateEditEnumView.m in Sources */,
 				6B57D60E2105E07C005157C4 /* UIImage+YV_ColorImage.m in Sources */,
+				6B2D4544212417A300AAC0C5 /* UIImage+FixOrientation.m in Sources */,
 				6BADD2D020FEDE5700DCA870 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

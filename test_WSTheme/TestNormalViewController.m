@@ -18,20 +18,29 @@
 @property (weak, nonatomic) IBOutlet UIButton *btnNext;
 - (IBAction)actionNext:(UIButton *)sender;
 
+@property(nonatomic) UIStatusBarStyle statusBarColorType;
+
+@property(nonatomic) int testIndex;
+
 @property(nonatomic) BOOL startLoop;
 
 @end
 
 @implementation TestNormalViewController
-{
-    int testIndex;
-}
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     _startLoop = YES;
-    testIndex = 0;
-     [self addWSThemeControl];
+    _statusBarColorType = UIStatusBarStyleDefault;
+
+    NSArray *themeNamelist = [WSTheme sharedObject].themeNameList;
+    _testIndex = (int)[themeNamelist indexOfObject:[WSTheme sharedObject].currentThemeName];
+    if (_testIndex == NSNotFound) {
+        _testIndex = 0;
+    }
+
+    [self addWSThemeControl];
 
 }
 
@@ -53,14 +62,15 @@
     __weak typeof(self) weakSelf = self;
         // 跟随主题切换更新一次.不需要返回的内容
     self.btnNext.wsTheme.custom(nil, 0, ^(UIButton *item, id value) {
-        item.tag ++;
-        NSString *title = [NSString stringWithFormat:@"切换主题(%ld)",(long)item.tag];
+        NSString *title = [NSString stringWithFormat:@"切换主题(%d)",weakSelf.testIndex];
         [item setTitle:title forState:UIControlStateNormal];
         weakSelf.title = [WSTheme sharedObject].currentThemeName;
         
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
-        [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+        [cModel getDataWithIdentifier:@"statusBarStyle" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+            weakSelf.statusBarColorType = style.intValue;
             dispatch_async(dispatch_get_main_queue(), ^{
+//                [self setNeedsStatusBarAppearanceUpdate];
                 [UIApplication sharedApplication].statusBarStyle = style.intValue;
             });
         }];
@@ -69,7 +79,7 @@
 
 
     self.view.wsTheme.color(@"normal_backgroundColor", ^(UIView *item, UIColor *value) {
-        item.backgroundColor = value;
+        item.backgroundColor = value?:[UIColor whiteColor];
     });
 
     self.navigationController.navigationBar.wsTheme.custom(@"navBarDefine.barTinColor",WSThemeValueTypeColor, ^(UINavigationBar *item, UIColor *value) {
@@ -103,6 +113,8 @@
 
 
     self.imgView.wsTheme.custom(@"imageView.orginImage",WSThemeValueTypeImage, ^(UIImageView *item, UIImage *value) {
+            // TODO:test
+        NSLog(@"==== 获取远程图片回调:%@ ====",value);
         if(value){
             item.image = value;
         }
@@ -114,15 +126,15 @@
 
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-
-        for (int it=0; it<1000; it++) {
+        int addNum = 10;
+        for (int it=0; it<addNum; it++) {
             self.textLabel.wsTheme.custom(@"color.textColor", WSThemeValueTypeOriginal, ^(UILabel *item, NSString *value) {
                 NSString *nowStr = [NSString stringWithFormat:@"%@\t - %d\t",value,it];
                 NSLog(@"-- 更新调用:%@ --",nowStr);
                 item.text = nowStr;
             });
         }
-        NSLog(@"==== 注册完成 1000个 ====");
+        NSLog(@"==== 注册完成 %d 个 ====",addNum);
     });
 
 }
@@ -133,8 +145,8 @@
     NSArray *themeList = [[WSTheme sharedObject] themeNameList];
         //    int index = arc4random_uniform(themeList.count);
     if (themeList.count>0) {
-        testIndex ++;
-        NSString *themeName = themeList[testIndex%themeList.count];
+        _testIndex ++;
+        NSString *themeName = themeList[_testIndex%themeList.count];
         [[WSTheme sharedObject] startTheme:themeName];
     }
 
@@ -166,6 +178,15 @@
 
 
 
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return self.statusBarColorType;
+}
+
+- (BOOL)prefersStatusBarHidden
+{
+    return NO;
+}
 
 
 @end

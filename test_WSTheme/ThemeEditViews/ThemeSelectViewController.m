@@ -79,8 +79,7 @@
     if (isOK) {
         [self.tableView setEditing:NO animated:YES];
         ThemeCreateViewController *createVC = [ThemeCreateViewController new];
-        createVC.tileList = titleList;
-        createVC.subItemList = subItemList;
+        createVC.selectedThemeName = themeName;
         [self.navigationController pushViewController:createVC animated:YES];
     }else{
         // 显示错误. 解析当前主题内容错误.
@@ -274,12 +273,12 @@
     //提醒框封装方法
 -(UIAlertController *)showAlertMessage:(NSString *)message needConfirm:(BOOL)isNeed complete:(void(^)(BOOL isOK,id data))completionHandler
 {
-    return [self.view showAlertWithTitle:nil withText:message type:isNeed?2:4 forViewController:self completionHandler:completionHandler];
+    return [UIView showAlertWithTitle:nil withText:message type:isNeed?2:4 forViewController:self completionHandler:completionHandler];
 }
 
 -(UIAlertController *)showAlertInputTextWithMsg:(NSString *)message complete:(void(^)(BOOL isOK,id data))completionHandler
 {
-    return [self.view showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
+    return [UIView showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
 }
 
 @end

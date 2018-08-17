@@ -10,7 +10,7 @@
 
 @interface ThemeCreateViewController : UIViewController
 
-@property(nonatomic) NSArray *tileList;
-@property(nonatomic) NSArray *subItemList;
+@property(nonatomic) NSString *selectedThemeName; // 需要复制的theme名称.
+
 
 @end

@@ -18,7 +18,7 @@
 @interface ThemeCreateEditToolAlertController ()
 
 @property(nonatomic) ThemeCreateEditToolAlertBlock callBack;
-@property(nonatomic) UIView<ThemeCreateEditViewProtocol> *mCustomView;
+@property(nonatomic,weak) UIView<ThemeCreateEditViewProtocol> *mCustomView;
 
 @end
 
@@ -86,7 +86,7 @@
 +(ThemeCreateEditToolAlertController *)createAlertControllerForCustomView:(UIView<ThemeCreateEditViewProtocol> *)customView
 {
     ThemeCreateEditToolAlertController *alertVC = [ThemeCreateEditToolAlertController alertControllerWithTitle:alertControllerFindTitle message:alertControllerFindSubTitle preferredStyle:UIAlertControllerStyleAlert];
-
+    alertVC.mCustomView = customView;
     UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"确  认" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         if (alertVC.callBack) {
             alertVC.callBack(YES,[customView getCurrentValue]);

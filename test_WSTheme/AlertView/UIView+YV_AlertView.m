@@ -2,7 +2,7 @@
 //  UIView+YV_AlertView.m
 //  yivian
 //
-//  Created by wsliang on 2018/3/28.
+//  Created by 王士良 on 2018/3/28.
 //  Copyright © 2018年 yivian. All rights reserved.
 //
 
@@ -12,8 +12,39 @@
 
 @implementation UIView (YV_AlertView)
 
++(UIAlertController *)showActionSheetWithTitle:(NSString *)title withText:(NSString*)text withActionNames:(NSArray<NSString *> *)names forViewController:(UIViewController *)presentVC completionHandler:(void(^)(BOOL isOK,NSString *title))completionHandler
+{
+    if (!presentVC) {
+        return nil;
+    }
+    UIAlertController *alertC = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleActionSheet];
 
--(UIAlertController *)showAlertWithTitle:(NSString*)title withText:(NSString*)text type:(int)type forViewController:(UIViewController *)presentVC completionHandler:(void(^)(BOOL isOK,id data))completionHandler
+    for (int it=0; it<names.count; it++) {
+        NSString *tempName = names[it];
+        UIAlertAction *action2 = [UIAlertAction actionWithTitle:tempName style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+            NSLog(@"UIAlertActionStyleDefault");
+            if (completionHandler) {
+                completionHandler(YES,action.title);
+            }
+        }];
+        [alertC addAction:action2];
+    }
+
+    UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:@"取  消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
+        NSLog(@"UIAlertActionStyleCancel");
+        if (completionHandler) {
+            completionHandler(NO,nil);
+        }
+    }];
+    [alertC addAction:actionCancel];
+
+    [presentVC presentViewController:alertC animated:YES completion:nil];
+    return alertC;
+}
+
+
+
++ (UIAlertController *)showAlertWithTitle:(NSString*)title withText:(NSString*)text type:(int)type forViewController:(UIViewController *)presentVC completionHandler:(void(^)(BOOL isOK,id data))completionHandler
 {
     if (!presentVC) {
         return nil;

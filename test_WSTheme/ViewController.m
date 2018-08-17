@@ -134,8 +134,9 @@
 
         // 自定义 读取主题的设置.
         WSThemeModel *cModel = [WSTheme sharedObject].currentThemeModel;
-        [cModel getDataWithIdentifier:@"statusBarStyple" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
+        [cModel getDataWithIdentifier:@"statusBarStyle" backType:WSThemeValueTypeOriginal complete:^(NSNumber *style) {
             dispatch_async(dispatch_get_main_queue(), ^{
+//                [self setNeedsStatusBarAppearanceUpdate];
                 [UIApplication sharedApplication].statusBarStyle = style.intValue; // 设定 状态条 颜色
             });
         }];

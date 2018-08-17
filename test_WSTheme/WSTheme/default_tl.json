@@ -18,7 +18,7 @@
 
     "imageView":{"name":"图片控件设置","desc":"图片控件设置描述","order":2,"type":"node"},
     "imageView.background":{"name":"背景色","desc":"背景色描述","order":1,"type":"color","default":"#EECCCC"},
-    "imageView.defaultImage":{"name":"默认图片","desc":"默认图片描述","order":2,"type":"image","default":"testpic.png"},
+    "imageView.defaultImage":{"name":"默认图片","desc":"默认图片描述","order":2,"type":"image","default":"testpic.png","attachs":"{45,45}"},
     "imageView.orginImage":{"name":"远程图片","desc":"远程图片描述","order":3,"type":"image","default":"https://www.baidu.com/img/bd_logo.png"},
 
     "color":{"name":"颜色设置","desc":"颜色设置描述","order":3,"type":"node"},

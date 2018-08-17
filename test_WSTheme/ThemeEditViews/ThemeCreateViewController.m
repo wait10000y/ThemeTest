@@ -11,10 +11,10 @@
 #import "ThemeEditCommon.h"
 #import "ThemeEditManager.h"
 #import "ThemeCreateHeaderView.h"
-#import "TransDataUtils.h"
 
 #import "ThemeCreateEditToolAlertController.h"
 #import "UIView+YV_AlertView.h"
+#import "SSImagePickerHelper.h"
 
 
 @interface ThemeCreateViewController ()<UINavigationControllerDelegate,UIGestureRecognizerDelegate>
@@ -28,6 +28,7 @@
 
 @property(nonatomic) NSString *themeName; // 新主题名称.
 
+
 @property(nonatomic) ThemeEditManager *editManager;
 
 @property(nonatomic) ThemeCreateHeaderView *headerView;
@@ -35,9 +36,20 @@
 @property(nonatomic,weak) UIBarButtonItem *backBarButtonItem;
 
 @property(nonatomic) BOOL hasLoadThemeData;
+
+@property(nonatomic) SSImagePickerHelper *photoAlbum; // 相册控件
 @end
 
 @implementation ThemeCreateViewController
+
+-(SSImagePickerHelper *)photoAlbum
+{
+    if (!_photoAlbum) {
+        _photoAlbum = [[SSImagePickerHelper alloc] init];
+        _photoAlbum.allowsEditing = YES;
+    }
+    return _photoAlbum;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -100,14 +112,15 @@
 // 保存主题
 -(void)barItemAction:(UIBarButtonItem *)sender
 {
-
+__weak typeof(self) weakSelf = self;
     switch (sender.tag) {
         case 1: // 清空数据,返回
         {
             [self showAlertMessage:@"是否退出新建主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
                 if(isOK){
-                    [self clearSavedData];
-                    [self.navigationController popViewControllerAnimated:YES];
+                    [weakSelf.tableView setContentOffset:weakSelf.tableView.contentOffset animated:NO];
+                    [weakSelf clearSavedData];
+                    [weakSelf.navigationController popViewControllerAnimated:YES];
                 }
             }];
         } break;
@@ -115,9 +128,10 @@
         {
             [self showAlertMessage:@"是否清空已编辑的内容?" needConfirm:YES complete:^(BOOL isOK, id data) {
                 if(isOK){
-                    [self clearSavedData];
+                    [weakSelf.tableView setContentOffset:weakSelf.tableView.contentOffset animated:NO];
+//                    [weakSelf clearSavedData];
                         // 重置数据.
-                    [self loadThemeData];
+                    [weakSelf loadThemeData];
                 }
             }];
         } break;
@@ -125,9 +139,10 @@
         {
             [self showAlertMessage:@"是否保存主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
                 if(isOK){
-                    [self saveThemeData];
-                    [self showAlertMessage:@"保存完成!" needConfirm:NO complete:^(BOOL isOK, id data) {
-                        [self.navigationController popViewControllerAnimated:YES];
+                    [weakSelf.tableView setContentOffset:weakSelf.tableView.contentOffset animated:NO];
+                    [weakSelf saveThemeData];
+                    [weakSelf showAlertMessage:@"保存完成!" needConfirm:NO complete:^(BOOL isOK, id data) {
+                        [weakSelf.navigationController popViewControllerAnimated:YES];
                     }];
                 }
             }];
@@ -149,9 +164,7 @@
 {
     self.tableViewCellId = @"YV_ThemeListViewControllerCell";
     self.headerView = [ThemeCreateHeaderView ceateHeaderView];
-    NSString *title = [NSString stringWithFormat:@"主题%-ld",(long)[[NSDate date] timeIntervalSince1970]];
-    self.themeName = title;
-    self.headerView.textTitle.text = title;
+    self.headerView.textTitle.text = @"未命名主题";
     __weak typeof(self) weakSelf = self;
     self.headerView.callBlack = ^(UILabel *textTitle) {
         [weakSelf showCreateThemeNameView];
@@ -163,50 +176,80 @@
 -(void)loadThemeData
 {
 
-    self.titleList = self.tileList;
-    self.subTitleList = self.subItemList;
-    [self.tableView reloadData];
-    if (self.titleList.count == 0 || self.subItemList.count == 0 || (_titleList.count != _subItemList.count)) {
-        // 显示 错误.
-
+    if (!self.selectedThemeName) {
+        [self backLastViewAndShowMessage:@"选择的主题错误,请重新选择!"];
         return;
     }
 
+    NSArray *subItemList;
+    NSArray *titleList;
+    BOOL isOK = [ThemeEditManager parseThemeEditItemList:&subItemList titleList:&titleList forTheme:self.selectedThemeName];
 
+    if (!isOK || (titleList.count != subItemList.count) || subItemList.count == 0) {
+            // 显示 错误.
+        [self backLastViewAndShowMessage:@"主题数据错误,无法创建新主题!"];
+        return;
+    }
+
+    // 复制 主题目录.
+    NSString *tempPath = [ThemeEditManager newThemeCacheMainPath:YES];
+     NSString *selectdPath = [ThemeEditManager themeMainPathWithName:self.selectedThemeName];
+    BOOL isCopy = [[NSFileManager defaultManager] copyItemAtPath:selectdPath toPath:tempPath error:nil];
+    if (!isCopy) {
+        [self backLastViewAndShowMessage:@"创建新主题缓存错误!"];
+        return;
+    }
+
+    self.titleList = titleList;
+    self.subTitleList = subItemList;
+    [self.tableView reloadData];
 }
 
+-(void)backLastViewAndShowMessage:(NSString *)theMsg
+{
+    [self showAlertMessage:theMsg needConfirm:NO complete:^(BOOL isOK, id data) {
+        if (self.navigationController) {
+            [self.navigationController popViewControllerAnimated:YES];
+        }else{
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
+    }];
+}
 
-    // 重置已设置的数据
+// 删除 所有数据.
 -(BOOL)clearSavedData
 {
 // 清除临时文件夹文件.
-
-    if (self.subTitleList.count>0) {
-        for (NSArray *subArr in self.subTitleList) {
-            for (ThemeEditItemModel *tempInfo in subArr) {
-                tempInfo.value = tempInfo.defalut;
-            }
-        }
-    }
+//    if (self.subTitleList.count>0) {
+//        for (NSArray *subArr in self.subTitleList) {
+//            for (ThemeEditItemModel *tempInfo in subArr) {
+//                tempInfo.value = tempInfo.defalut;
+//            }
+//        }
+//    }
+    
+    [ThemeEditManager newThemeCacheMainPath:YES];
+    
     return YES;
 }
 
 -(BOOL)saveThemeData
 {
-    if (self.themeName.length==0) {
+    if (_themeName.length==0) {
             // 提示 创建主题.
         [self showCreateThemeNameView];
         return NO;
     }
 
-    return [ThemeEditManager saveNewTheme:self.subTitleList withName:self.themeName];
+    return [ThemeEditManager saveNewTheme:self.subTitleList withName:_themeName hasPackage:YES];
 
 }
 
 // 弹出 创建主题的名称
 -(void)showCreateThemeNameView
 {
-    UIAlertController *alertView = [self showAlertInputTextWithMsg:@"输入新主题的名称" complete:^(BOOL isOK, NSString *name) {
+    __weak typeof(self) weakSelf = self;
+    ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createTextAlertWithText:self.headerView.textTitle.text complete:^(BOOL isOK, NSString *name) {
         if (isOK) {
             name = [name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             if(name.length>0){
@@ -224,29 +267,27 @@
                 }
 
                 if (hasSameName) {
-                    [self showAlertMessage:@"该名称主题已存在!" needConfirm:NO complete:^(BOOL isOK, id data) {
-                        [self showCreateThemeNameView];
+                    [weakSelf showAlertMessage:@"该名称主题已存在!" needConfirm:NO complete:^(BOOL isOK, id data) {
+                        [weakSelf showCreateThemeNameView];
                     }];
                 }else{
-                    self.themeName = name;
-                    self.headerView.textTitle.text = name;
+                    weakSelf.themeName = name;
+                    weakSelf.headerView.textTitle.text = name;
                 }
             }else{
-                [self showAlertMessage:@"名称不能为空,或者其他特殊字符!" needConfirm:NO complete:^(BOOL isOK, id data) {
-                    [self showCreateThemeNameView];
+                [weakSelf showAlertMessage:@"名称不能为空,或者其他特殊字符!" needConfirm:NO complete:^(BOOL isOK, id data) {
+                    NSString *title = [NSString stringWithFormat:@"新主题%-ld",(long)[[NSDate date] timeIntervalSince1970]];
+                    weakSelf.headerView.textTitle.text = title;
+                    [weakSelf showCreateThemeNameView];
                 }];
             }
         }
     }];
-    alertView.textFields.firstObject.text = self.headerView.textTitle.text;
+[textAlert setTipTitle:@"输入新主题的名称"];
+[self presentViewController:textAlert animated:YES completion:nil];
 
 }
 
-// 保存 资源文件到临时目录,保存theme时 统一移动到正式目录.
--(void)saveThemeFileTempWithFileUrl:(NSURL *)fileUrl
-{
-
-}
 
 #pragma mark ======== delegate ==========
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -314,34 +355,51 @@
 
     NSArray *itemModelArr = self.subTitleList[indexPath.section];
     ThemeEditItemModel *itemModel = itemModelArr[indexPath.row];
-    NSString *itemValue = itemModel.type?:(itemModel.value?[itemModel.value description]:itemModel.desc);
-    cell.textLabel.text = itemModel.name;
-    cell.detailTextLabel.text = itemValue;
-    return cell;
-}
+//    NSString *itemValue = itemModel.type?:(itemModel.value?[itemModel.value description]:itemModel.desc);
+    UIImage *imageIcon;
+    NSString *detailText;
+    switch (itemModel.mType) {
 
-    // 递归获取子视图
-- (void)getSub:(UIView *)view andLevel:(int)level {
-    NSArray *subviews = [view subviews];
-
-        // 如果没有子视图就直接返回
-    if ([subviews count] == 0) return;
-
-    for (UIView *subview in subviews) {
-
-            // 根据层级决定前面空格个数，来缩进显示
-        NSString *blank = @"";
-        for (int i = 1; i < level; i++) {
-            blank = [NSString stringWithFormat:@"  %@", blank];
-        }
-
-            // 打印子视图类名
-        NSLog(@"%@%d: %@", blank, level, subview);
-
-            // 递归获取此视图的子视图
-        [self getSub:subview andLevel:(level+1)];
-
+        case ThemeEditItemTypeImage:
+        {
+            detailText = @"图片资源";
+            NSString *fileName = itemModel.value;
+            if (![fileName containsString:@"/"]) {
+                NSData *tempData = [ThemeEditManager newThemeCacheGetResourceWithFileName:fileName];
+                if (tempData) {
+                    imageIcon = [UIImage imageWithData:tempData];
+                }
+            }else{
+                detailText = @"网络图片资源";
+            }
+        } break;
+        case ThemeEditItemTypeData:
+        {
+            detailText = @"Data数据";
+            NSString *fileName = itemModel.value;
+            if ([fileName containsString:@"/"]) {
+                detailText = @"网络Data数据";
+            }
+        } break;
+        case ThemeEditItemTypeDict:
+        {
+            detailText = @"字典内容";
+        } break;
+        case ThemeEditItemTypeNode:
+        {
+            detailText = @"分组节点";
+        } break;
+        default:
+        {
+            detailText = [itemModel.value description]?:@"没内容";
+        } break;
     }
+
+    cell.textLabel.text = itemModel.name;
+    cell.detailTextLabel.text = detailText;
+    cell.imageView.image = imageIcon;
+
+    return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -349,8 +407,12 @@
     NSMutableArray *itemModelArr = self.subTitleList[indexPath.section];
     ThemeEditItemModel *itemModel = itemModelArr[indexPath.row];
 //    NSString *itemValue = itemModel.value;
-    NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
 
+    if (itemModel.mType == ThemeEditItemTypeNode) { // 不可编辑的类型.
+        return;
+    }
+
+    NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
     // 判断枚举类型
     if(itemModel.enums.count>0){ // enums 格式要正确.
         ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createEnumAlertWithDataDict:itemModel.enums defaultValue:itemModel.value complete:^(BOOL isOK, NSString *data) {
@@ -366,7 +428,7 @@
     }
 
     /**
-     type: color:1,text:2,font:3,image:4,number:5,dict:6,enum:7
+     type: none,node,color:1,text:2,font:3,image:4,data:5,number:6,dict:7
      value: nsstring,nsnumber,nsdictionary
      */
     switch (itemModel.mType) {
@@ -378,17 +440,24 @@
 //        {
 //
 //        } break;
-//        case ThemeEditItemTypeImage:
-//        {
-//
-//        } break;
+        case ThemeEditItemTypeImage:
+        {
+            if (itemModel.attachs) {
+                CGSize tempSize = CGSizeFromString([itemModel.attachs description]);
+                if (tempSize.width>0 && tempSize.height>0) {
+                        // TODO:test
+                    NSLog(@"==== 可以修改图片尺寸:%@ ====",itemModel.attachs);
+                }
+            }
+            [self showImageSelectViewForItem:itemModel withIndexPath:indexPath];
+        } break;
 //        case ThemeEditItemTypeNumber:
 //        {
 //
 //        } break;
         case ThemeEditItemTypeColor: // color
         {
-            UIColor *cColor = [TransDataUtils parseColorWithValue:itemModel.value];
+            UIColor *cColor = [itemModel createColor];
             ThemeCreateEditToolAlertController *colorAlert = [ThemeCreateEditToolAlertController createColorAlertWithColor:cColor complete:^(BOOL isOK, NSString *data) {
                 if (isOK) {
                     itemModel.value = data;
@@ -401,7 +470,7 @@
         } break;
         case ThemeEditItemTypeText: //text
         {
-            NSString *cText = [itemModel.value description];
+            NSString *cText = [itemModel createJsonText];
             ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createTextAlertWithText:cText complete:^(BOOL isOK, NSString *data) {
                 if (isOK) {
                     itemModel.value = data;
@@ -414,10 +483,10 @@
         } break;
         case ThemeEditItemTypeFont: // font
         {
-            UIFont *tempFont = [TransDataUtils parseFontWithValue:itemModel.value];
+            UIFont *tempFont = [itemModel createFont];
             ThemeCreateEditToolAlertController *fontAlert = [ThemeCreateEditToolAlertController createFontAlertWithFont:tempFont complete:^(BOOL isOK, UIFont *data) {
                 if (isOK) {
-                    itemModel.value = [TransDataUtils parseFontStringWithValue:data];
+                    itemModel.value = [itemModel parseFont:data];
                     [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                 }
             }];
@@ -427,10 +496,10 @@
         } break;
         default:
         {
-            NSString *cText = [TransDataUtils parseDictStringWithValue:itemModel.value];
+            NSString *cText = [itemModel createJsonText];
             ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createTextAlertWithText:cText complete:^(BOOL isOK, NSString *data) {
                 if (isOK) {
-                    itemModel.value = [TransDataUtils parseDictWithValue:data];
+                    itemModel.value = [itemModel parseJsonText:data];
                     [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                 }
             }];
@@ -442,17 +511,78 @@
 
 }
 
+-(void)showImageSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+{
+    // 相册上传,直接输入,取消
+    __weak typeof(self) weakSelf = self;
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"相机拍照",@"相册选取",@"修改地址"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+        if(isOK){
+            if ([@"相机拍照" isEqualToString:title]) {
+                [weakSelf.photoAlbum showImagePickerControllerWithSourceType:UIImagePickerControllerSourceTypeCamera presentingViewController:weakSelf completionHandler:^(UIImage *image, NSDictionary *info) {
+//                    NSLog(@"image:%@ ,info:%@",image, info);
+                    NSString *tempFileName = [NSString stringWithFormat:@"%@.png",itemModel.keypath];
+                    NSData *imgData = UIImagePNGRepresentation(image);
+                    BOOL isOK = [ThemeEditManager newThemeCacheSaveResource:imgData forFileName:tempFileName];
+                    if (isOK) {
+                        itemModel.value = tempFileName;
+                        itemModel.defalut = tempFileName; // 不可撤回.
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+                }];
+
+            }else if([@"相册选取" isEqualToString:title]) {
+                [weakSelf.photoAlbum showImagePickerControllerWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary presentingViewController:weakSelf completionHandler:^(UIImage *image, NSDictionary *info) {
+//                    NSLog(@"image:%@ ,info:%@",image, info);
+
+                    // 修改图片尺寸.根据配置项.
+//                    if (itemModel.attachs) {
+//                        CGSize tempSize = CGSizeFromString([itemModel.attachs description]);
+//                        if (tempSize.width>0 && tempSize.height>0) {
+//                                // TODO:test
+//                            NSLog(@"==== 可以修改图片尺寸:%@ ====",itemModel.attachs);
+//                        }
+//                    }
+                    NSString *tempFileName = [NSString stringWithFormat:@"%@.png",itemModel.keypath];
+                    NSData *imgData = UIImagePNGRepresentation(image);
+                    BOOL isOK = [ThemeEditManager newThemeCacheSaveResource:imgData forFileName:tempFileName];
+                    if (isOK) {
+                        itemModel.value = tempFileName;
+                        itemModel.defalut = tempFileName; // 不可撤回.
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+
+                }];
+
+            }else if ([@"修改地址" isEqualToString:title]){ // 会删除原资源文件.
+                NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"图片地址"];
+                NSString *cText = [itemModel createJsonText];
+                ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createTextAlertWithText:cText complete:^(BOOL isOK, NSString *data) {
+                    if (isOK) {
+                        if (![cText containsString:@"/"]) { // 不是网络地址时
+                            [ThemeEditManager newThemeCacheRemoveResourceWithFileName:cText];
+                        }
+                        itemModel.value = [itemModel parseJsonText:data];
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+                }];
+                [textAlert setTipTitle:editViewTitle];
+                [weakSelf presentViewController:textAlert animated:YES completion:nil];
+
+            }
+        }
+    }];
+}
 
 // utils
 //提醒框封装方法
 -(UIAlertController *)showAlertMessage:(NSString *)message needConfirm:(BOOL)isNeed complete:(void(^)(BOOL isOK,id data))completionHandler
 {
-    return [self.view showAlertWithTitle:nil withText:message type:isNeed?2:4 forViewController:self completionHandler:completionHandler];
+    return [UIView showAlertWithTitle:nil withText:message type:isNeed?2:4 forViewController:self completionHandler:completionHandler];
 }
 
 -(UIAlertController *)showAlertInputTextWithMsg:(NSString *)message complete:(void(^)(BOOL isOK,id data))completionHandler
 {
-    return [self.view showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
+    return [UIView showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
 }
 
 

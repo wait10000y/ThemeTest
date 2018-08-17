@@ -74,13 +74,13 @@
         NSLog(@"-- textShow 更新 1 --");
     }).custom(^(UILabel *item, NSString *themeName) {
         NSLog(@"-- textShow 更新 2 --");
-        item.textColor = [weakSelf getIndexColor];
+        [item performSelectorOnMainThread:@selector(setTextColor:) withObject:[weakSelf getIndexColor] waitUntilDone:NO];
     });
 
 
     for (int it=0; it<10; it++) {
         self.view.wsThemeSimple.custom(^(UIView *item, NSString *themeName) {
-            item.tag = arc4random();
+            [item performSelectorOnMainThread:@selector(setTag:) withObject:@(arc4random()) waitUntilDone:NO];
             NSLog(@"--custom1 view:tag %d----",it);
         }).custom(^(id item2, NSString *themeName) {
             NSLog(@"--custom2 view:tag %d----",it);
