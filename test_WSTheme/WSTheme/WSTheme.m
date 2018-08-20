@@ -37,13 +37,13 @@ archive数据目录
 
 #define WSThemeFileManager_themeThemeListMainPath @"WSTheme/themeList"
 #define WSThemeFileManager_themeCacheFileMainPath @"WSTheme/cacheFiles"
-#define WSThemeFileManager_themeArchiveDataMainPath @"WSTheme/archiveData"
+#define WSThemeFileManager_themeArchiveDataMainPath @"WSTheme/archiveFiles"
 
 #define WSThemeFileManager_themeJsonName @"theme.json"
 #define WSThemeFileManager_themeTemplateJsonName @"theme_tl.json"
 #define WSThemeFileManager_themeResourceName @"files"
 
-#define WSThemeFileManager_themeNameListName @"_themeNameList.xml"
+#define WSThemeFileManager_themeNameListName @"_themeNameList.plist"
 #define WSThemeFileManager_themeNameCurrentName @"_themeNameCurrent.txt"
 
 @interface WSThemeFileManager:NSObject
@@ -303,14 +303,14 @@ archive数据目录
     // 主题列表保存路径
 - (NSString *)themeNameListPath
 {
-    NSString *basePath = [self themeArchiveObjectMainPath:nil isClear:NO];
+    NSString *basePath = [self themeMainPath:nil];
     return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeNameListName];
 }
 
     // 当前主题保存路径
 - (NSString *)themeCurrentNamePath
 {
-    NSString *basePath = [self themeArchiveObjectMainPath:nil isClear:NO];
+    NSString *basePath = [self themeMainPath:nil];
     return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeNameCurrentName];
 }
 
@@ -320,7 +320,7 @@ archive数据目录
     // 主题 cache文件路径
 - (NSString *)themeCacheFilePath:(NSString *)themeName fileName:(NSString *)fileName
 {
-    NSString *basePath = [self themeCacheMainPath:[NSString stringWithFormat:@"%@/%@",themeName,WSThemeFileManager_themeResourceName] isClear:NO];
+    NSString *basePath = [self themeCacheMainPath:themeName?[NSString stringWithFormat:@"%@",themeName]:nil isClear:NO];
     return fileName?[basePath stringByAppendingPathComponent:fileName]:basePath;
 }
 
@@ -357,7 +357,7 @@ archive数据目录
     // isClear 是否清空已存在的文件.
 - (NSString *)themeMainPath:(NSString *)themeName isAutoCreate:(BOOL)isCreate isClear:(BOOL)isClear
 {
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject]; // NSDocumentDirectory
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]; // NSDocumentDirectory
     path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",WSThemeFileManager_themeThemeListMainPath,themeName?:@""]];
     if (isCreate) {
         NSFileManager *fm = [NSFileManager defaultManager];
@@ -381,7 +381,7 @@ archive数据目录
 // 缓存等 主路径
 -(NSString *)themeCacheMainPath:(NSString *)themeName isClear:(BOOL)isClear
 {
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *path = NSTemporaryDirectory();
     path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",WSThemeFileManager_themeCacheFileMainPath,themeName?:@""]];
     NSFileManager *fm = [NSFileManager defaultManager];
     if(![fm fileExistsAtPath:path]){
@@ -614,6 +614,7 @@ archive数据目录
         NSUInteger index = [mThemeNameList indexOfObject:tempName];
         if (index != NSNotFound) {
             if ([_themeFileUtil themeRemove:tempName]) {
+                [_themeFileUtil themeCacheMainPath:tempName isClear:YES];
                 [mThemeNameList removeObjectAtIndex:index];
                 subNum ++;
             }
@@ -732,9 +733,13 @@ archive数据目录
 
 -(void)createDefaultData
 {
+    NSString *cachePath = [self.themeFileUtil themeCacheFilePath:_name fileName:[NSString stringWithFormat:@"%@.modelcache",_name]];
+    NSArray *tempArray = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePath];
+
     _cacheDictList = [[NSMutableArray alloc] initWithCapacity:WSThemeValueTypeNone];
     for (int it=0; it<WSThemeValueTypeNone; it++) {
-        [_cacheDictList addObject:[NSMutableDictionary new]];
+        NSDictionary *tempDict = (tempArray.count>it)?tempArray[it]:nil;
+        [_cacheDictList addObject:[[NSMutableDictionary alloc] initWithDictionary:tempDict]];
     }
 }
 
@@ -747,13 +752,10 @@ archive数据目录
 }
 -(BOOL)loadThemeDataWithName:(NSString *)themeName
 {
-    if ([themeName isEqualToString:_name]) {
-        return YES;
-    }
-    NSDictionary *jsonDict = [self.themeFileUtil themeGetJsonDict:themeName];
-    [self createDefaultData];
     _name = themeName;
+    NSDictionary *jsonDict = [self.themeFileUtil themeGetJsonDict:themeName];
     _mThemeDict = jsonDict;
+    [self createDefaultData];
     return YES;
 }
 
@@ -1133,6 +1135,11 @@ archive数据目录
 -(void)dealloc
 {
     NSLog(@"model系统回收:%@",self);
+    if (_cacheDictList) {
+        NSString *cachePath = [self.themeFileUtil themeCacheFilePath:_name fileName:[NSString stringWithFormat:@"%@.modelcache",_name]];
+        NSData *tempData = [NSKeyedArchiver archivedDataWithRootObject:_cacheDictList];
+        [tempData writeToFile:cachePath atomically:YES];
+    }
     _mThemeDict = nil;
     _cacheDictList = nil;
 }
