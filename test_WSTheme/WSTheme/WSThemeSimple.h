@@ -16,8 +16,8 @@
 themeName 是传回当前切换的主题(名称).
 
 #define openUpdateThreadQueue 16 // 数值是可并行执行的线程数.
- 默认开启线程池批量更新. 注意回调线程为线程池线程,非主线程.
- 关闭线程池批量更新后 更新线程为推送通知所在线程,即 [WSThemeSimple startTheme:] 所在的当前线程.
+ 默认开启线程池批量更新. 注意回调线程为线程池分配的线程,而非主线程或同一个线程.
+ 未使用线程池 回调线程为触发推送通知所在线程,即调用 [WSThemeSimple startTheme:] 所在的线程.
 
 
 
@@ -36,7 +36,7 @@ themeName 是传回当前切换的主题(名称).
  });
  });
 
-
+// 如果未使用线程池,没必要使用链式方式在同一对象上多次注册block回调.
 
  */
 #import <Foundation/Foundation.h>
