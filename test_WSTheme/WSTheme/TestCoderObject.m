@@ -13,7 +13,7 @@
 
 -(void)testPrint
 {
-    NSLog(@"==== testPrint ====");
+    NSLog(@"==== testPrint name:%p ,_name:%p , titles:%p , _titles:%p ====",self.name,_name,self.titles,_titles);
 }
 
 +(instancetype)create

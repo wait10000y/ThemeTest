@@ -116,10 +116,9 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ZH-w8-pky">
-                                <rect key="frame" x="113" y="332" width="150" height="40"/>
+                                <rect key="frame" x="135" y="332" width="106" height="40"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="150" id="A2S-kK-kgM"/>
                                     <constraint firstAttribute="height" constant="40" id="TQM-hr-Ynw"/>
                                 </constraints>
                                 <state key="normal" title="测试simple功能"/>

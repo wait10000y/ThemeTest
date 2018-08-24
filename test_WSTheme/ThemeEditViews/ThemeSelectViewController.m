@@ -73,20 +73,11 @@
 
 -(void)openCreateViewController:(NSString *)themeName
 {
-    NSArray *subItemList;
-    NSArray *titleList;
-    BOOL isOK = [ThemeEditManager parseThemeEditItemList:&subItemList titleList:&titleList forTheme:themeName];
-    if (isOK) {
-        [self.tableView setEditing:NO animated:YES];
-        ThemeCreateViewController *createVC = [ThemeCreateViewController new];
-        createVC.selectedThemeName = themeName;
-        [self.navigationController pushViewController:createVC animated:YES];
-    }else{
-        // 显示错误. 解析当前主题内容错误.
-        NSString *errorStr = [NSString stringWithFormat:@"解析主题[%@]模板内容错误!",themeName];
-        [self showAlertMessage:errorStr needConfirm:NO complete:nil];
-    }
-
+    [self.tableView setEditing:NO animated:YES];
+    ThemeCreateViewController *createVC = [ThemeCreateViewController new];
+    createVC.selectedThemeName = themeName;
+    [self.navigationController pushViewController:createVC animated:YES];
+    
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -107,7 +98,7 @@
     NSMutableArray *customThemeList = [self.dataList objectAtIndex:1];
 
     NSArray *allNames = [ThemeEditManager themeNameList];
-    NSArray *sysNameList = [ThemeEditManager themeNameListSystem];
+    NSArray *sysNameList = [ThemeEditManager themeNameListFixed];
     if (sysNameList.count>0) {
         NSMutableArray *alls = [NSMutableArray arrayWithArray:allNames];
         [alls removeObjectsInArray:sysNameList];

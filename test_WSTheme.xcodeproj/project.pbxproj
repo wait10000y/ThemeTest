@@ -58,6 +58,7 @@
 		6B2D4540212417A200AAC0C5 /* SSImagePickerHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSImagePickerHelper.m; sourceTree = "<group>"; };
 		6B2D4541212417A200AAC0C5 /* UIImage+FixOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FixOrientation.h"; sourceTree = "<group>"; };
 		6B2D4542212417A200AAC0C5 /* UIImage+FixOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FixOrientation.m"; sourceTree = "<group>"; };
+		6B350F19212BD60000A165C0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6B57D5DF2105DFFA005157C4 /* ThemeCreateHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThemeCreateHeaderView.h; sourceTree = "<group>"; };
 		6B57D5E02105DFFA005157C4 /* ThemeCreateHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThemeCreateHeaderView.m; sourceTree = "<group>"; };
 		6B57D5E12105DFFA005157C4 /* ThemeCreateHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ThemeCreateHeaderView.xib; sourceTree = "<group>"; };
@@ -249,6 +250,7 @@
 				6B57D6132106CA07005157C4 /* yivian_tl.json */,
 				6BADD2E520FEDF8000DCA870 /* default.json */,
 				6B16868921096474008FAB20 /* default_tl.json */,
+				6B350F19212BD60000A165C0 /* README.md */,
 				6BADD2E620FEDF8000DCA870 /* WSTheme.h */,
 				6BADD2E720FEDF8000DCA870 /* WSTheme.m */,
 				6B62146B2111BFF6003F23E0 /* TestCoderObject.h */,

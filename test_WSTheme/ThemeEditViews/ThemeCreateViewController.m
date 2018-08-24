@@ -38,6 +38,7 @@
 @property(nonatomic) BOOL hasLoadThemeData;
 
 @property(nonatomic) SSImagePickerHelper *photoAlbum; // 相册控件
+
 @end
 
 @implementation ThemeCreateViewController
@@ -177,28 +178,28 @@ __weak typeof(self) weakSelf = self;
 {
 
     if (!self.selectedThemeName) {
-        [self backLastViewAndShowMessage:@"选择的主题错误,请重新选择!"];
+        [self backLastViewAndShowMessage:@"未正确选择主题!"];
+        return;
+    }
+
+        // 复制主题(selectedThemeName)到新主题缓存目录.
+    NSString *newPath = [_editManager createThemeCopyFromTheme:self.selectedThemeName];
+    if (!newPath) {
+        [self backLastViewAndShowMessage:@"新主题,无法创建缓存!"];
         return;
     }
 
     NSArray *subItemList;
     NSArray *titleList;
-    BOOL isOK = [ThemeEditManager parseThemeEditItemList:&subItemList titleList:&titleList forTheme:self.selectedThemeName];
+    BOOL isOK = [_editManager parseThemeEditItemList:&subItemList titleList:&titleList];
 
     if (!isOK || (titleList.count != subItemList.count) || subItemList.count == 0) {
             // 显示 错误.
-        [self backLastViewAndShowMessage:@"主题数据错误,无法创建新主题!"];
+        [self backLastViewAndShowMessage:@"数据错误,无法创建新主题!"];
         return;
     }
 
-    // 复制 主题目录.
-    NSString *tempPath = [ThemeEditManager newThemeCacheMainPath:YES];
-     NSString *selectdPath = [ThemeEditManager themeMainPathWithName:self.selectedThemeName];
-    BOOL isCopy = [[NSFileManager defaultManager] copyItemAtPath:selectdPath toPath:tempPath error:nil];
-    if (!isCopy) {
-        [self backLastViewAndShowMessage:@"创建新主题缓存错误!"];
-        return;
-    }
+
 
     self.titleList = titleList;
     self.subTitleList = subItemList;
@@ -228,7 +229,7 @@ __weak typeof(self) weakSelf = self;
 //        }
 //    }
     
-    [ThemeEditManager newThemeCacheMainPath:YES];
+    [ThemeEditManager newThemeMainPath:YES];
     
     return YES;
 }
@@ -241,7 +242,7 @@ __weak typeof(self) weakSelf = self;
         return NO;
     }
 
-    return [ThemeEditManager saveNewTheme:self.subTitleList withName:_themeName hasPackage:YES];
+    return [_editManager saveNewTheme:self.subTitleList withName:_themeName hasPackage:YES];
 
 }
 
@@ -365,7 +366,7 @@ __weak typeof(self) weakSelf = self;
             detailText = @"图片资源";
             NSString *fileName = itemModel.value;
             if (![fileName containsString:@"/"]) {
-                NSData *tempData = [ThemeEditManager newThemeCacheGetResourceWithFileName:fileName];
+                NSData *tempData = [_editManager newThemeGetResourceWithFileName:fileName];
                 if (tempData) {
                     imageIcon = [UIImage imageWithData:tempData];
                 }
@@ -442,13 +443,6 @@ __weak typeof(self) weakSelf = self;
 //        } break;
         case ThemeEditItemTypeImage:
         {
-            if (itemModel.attachs) {
-                CGSize tempSize = CGSizeFromString([itemModel.attachs description]);
-                if (tempSize.width>0 && tempSize.height>0) {
-                        // TODO:test
-                    NSLog(@"==== 可以修改图片尺寸:%@ ====",itemModel.attachs);
-                }
-            }
             [self showImageSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
 //        case ThemeEditItemTypeNumber:
@@ -520,9 +514,18 @@ __weak typeof(self) weakSelf = self;
             if ([@"相机拍照" isEqualToString:title]) {
                 [weakSelf.photoAlbum showImagePickerControllerWithSourceType:UIImagePickerControllerSourceTypeCamera presentingViewController:weakSelf completionHandler:^(UIImage *image, NSDictionary *info) {
 //                    NSLog(@"image:%@ ,info:%@",image, info);
+                    if (itemModel.attachs) {
+                        CGSize tempSize = CGSizeFromString([itemModel.attachs description]);
+                        if (!CGSizeEqualToSize(tempSize, CGSizeZero)) {
+                            NSLog(@"==== 可以修改图片尺寸:%@ ====",itemModel.attachs);
+                            
+
+                        }
+                    }
+
                     NSString *tempFileName = [NSString stringWithFormat:@"%@.png",itemModel.keypath];
                     NSData *imgData = UIImagePNGRepresentation(image);
-                    BOOL isOK = [ThemeEditManager newThemeCacheSaveResource:imgData forFileName:tempFileName];
+                    BOOL isOK = [weakSelf.editManager newThemeSaveResource:imgData forFileName:tempFileName];
                     if (isOK) {
                         itemModel.value = tempFileName;
                         itemModel.defalut = tempFileName; // 不可撤回.
@@ -544,7 +547,7 @@ __weak typeof(self) weakSelf = self;
 //                    }
                     NSString *tempFileName = [NSString stringWithFormat:@"%@.png",itemModel.keypath];
                     NSData *imgData = UIImagePNGRepresentation(image);
-                    BOOL isOK = [ThemeEditManager newThemeCacheSaveResource:imgData forFileName:tempFileName];
+                    BOOL isOK = [weakSelf.editManager newThemeSaveResource:imgData forFileName:tempFileName];
                     if (isOK) {
                         itemModel.value = tempFileName;
                         itemModel.defalut = tempFileName; // 不可撤回.
@@ -559,7 +562,7 @@ __weak typeof(self) weakSelf = self;
                 ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createTextAlertWithText:cText complete:^(BOOL isOK, NSString *data) {
                     if (isOK) {
                         if (![cText containsString:@"/"]) { // 不是网络地址时
-                            [ThemeEditManager newThemeCacheRemoveResourceWithFileName:cText];
+                            [weakSelf.editManager newThemeRemoveResourceWithFileName:cText];
                         }
                         itemModel.value = [itemModel parseJsonText:data];
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];

@@ -10,7 +10,7 @@
 
 @interface TestCoderObject : NSObject<NSCoding>
 
-@property(nonatomic) NSString *name;
+@property(nonatomic,copy) NSString *name;
 @property(nonatomic) NSArray *titles;
 
 -(void)testPrint;

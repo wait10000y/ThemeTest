@@ -15,8 +15,10 @@ static NSDictionary *templateJsonDict;
 
 
 @implementation ThemeEditManager
-
-+(void)setSystemThemeNames:(NSArray<NSString *> *)themeNameList
+{
+    WSThemeFile *fileUtil;
+}
++(void)setFixedThemeNames:(NSArray<NSString *> *)themeNameList
 {
     systemThemeList = themeNameList;
 }
@@ -27,7 +29,7 @@ static NSDictionary *templateJsonDict;
 }
 
     // theme主题列表(namelist)
-+(NSArray *)themeNameListSystem
++(NSArray *)themeNameListFixed
 {
     return systemThemeList;
 }
@@ -57,24 +59,52 @@ static NSDictionary *templateJsonDict;
     return NO;
 }
 
-// 获取 对应theme的json定义dict
-+(NSDictionary *)definedDictForTheme:(NSString *)themeName
+
+
+
+
+
+
+
+
+
+
+- (instancetype)init
 {
-    return [[[WSTheme sharedObject] themeModelForName:themeName] themeJsonDict];
+    self = [super init];
+    if (self) {
+        fileUtil = [WSThemeFile new];
+    }
+    return self;
 }
 
-    // 获取 对应theme的定义模板. themeName==nil,或者对应的模板不存在, 读取默认模板 defaultTemplate;
-    // 模板定义 key:keypath形式 直接定义指定字段意义. (可以无限级别,目前解析到二级)
-+(NSDictionary *)templateDictForTheme:(NSString *)themeName
+-(NSString *)createThemeCopyFromTheme:(NSString *)themeName
 {
-    NSDictionary *tempTlDict = [[[WSTheme sharedObject] themeModelForName:themeName] themeTemplateDict];
-    return tempTlDict?:templateJsonDict;
+    [fileUtil setThemePackagePathWithName:themeName];
+    NSString *tempPath = [ThemeEditManager newThemeMainPath:YES];
+    BOOL hasCopy = [fileUtil copyThemeToPackagePath:tempPath];
+    if (hasCopy) {
+        [fileUtil setThemePackagePath:tempPath];
+        return tempPath;
+    }
+    return nil;
 }
 
-+(NSString *)themeMainPathWithName:(NSString *)themeName
+-(BOOL)newThemeSaveResource:(NSData *)theData forFileName:(NSString *)fileName
 {
-    return [[[WSTheme sharedObject] themeModelForName:themeName] themePackagePath];
+    return [fileUtil saveThemeResourceData:theData withName:fileName];
 }
+
+-(BOOL)newThemeRemoveResourceWithFileName:(NSString *)fileName
+{
+    return [fileUtil saveThemeResourceData:nil withName:fileName];
+}
+
+-(NSData *)newThemeGetResourceWithFileName:(NSString *)fileName
+{
+    return [fileUtil loadThemeResourceWithName:fileName];
+}
+
 
     // 解析指定名称(themeName)theme的jsonDict内容.返回 ThemeEditItemModel的二级数组.
 /**
@@ -84,14 +114,14 @@ static NSDictionary *templateJsonDict;
  @titleList 数组: NSArray<ThemeEditItemModel *> 标题数组 上面数组的section名称;
  @return 是否解析成功.
  */
-+(BOOL)parseThemeEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> **)itemList titleList:(NSArray<ThemeEditItemModel *> **)titleList forTheme:(NSString *)themeName;
+-(BOOL)parseThemeEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> **)itemList titleList:(NSArray<ThemeEditItemModel *> **)titleList
 {
-    NSDictionary *jsonDict = [self definedDictForTheme:themeName];
+    NSDictionary *jsonDict = [fileUtil loadThemeDict];
     if (!jsonDict || jsonDict.count==0) {
         return NO;
     }
 
-    NSDictionary *templateDict = [self templateDictForTheme:themeName];
+    NSDictionary *templateDict = templateJsonDict;
 
     // 解析数据. 按照 二级模板 解析.
 
@@ -155,7 +185,6 @@ static NSDictionary *templateJsonDict;
         }
 
         [subItemModelList addObject:tempModelList];
-
     }
 
     *titleList = titleItemModelList;
@@ -165,7 +194,7 @@ static NSDictionary *templateJsonDict;
 }
 
 
-+(NSDictionary *)parseThemeJsonDictFromEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList
+-(NSDictionary *)parseThemeJsonDictFromEditItemList:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList
 {
         // 生成jsonDict
     NSMutableDictionary *tempJsonDict = [[NSMutableDictionary alloc] initWithCapacity:editItemList.count];
@@ -189,20 +218,21 @@ static NSDictionary *templateJsonDict;
 
 
     // 保存 新theme主题. hasPackage 是否有资源文件(文件夹的形式保存)
-+(BOOL)saveNewTheme:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList withName:(NSString *)newName hasPackage:(BOOL)hasPackage
+-(BOOL)saveNewTheme:(NSArray<NSArray<ThemeEditItemModel *> *> *)editItemList withName:(NSString *)newName hasPackage:(BOOL)hasPackage
 {
-    // 判断默认值 // 不可覆盖 themeNameListSystem 列表中的主题.
-    if(newName ==nil || editItemList.count==0 || [[self themeNameListSystem] containsObject:newName]){
+    // 判断默认值 // 不可覆盖 themeNameListFixed 列表中的主题.
+    if(newName ==nil || editItemList.count==0 || [[ThemeEditManager themeNameListFixed] containsObject:newName]){
         return NO;
     }
         // 保存
     NSDictionary *tempJsonDict = [self parseThemeJsonDictFromEditItemList:editItemList];
     if (!tempJsonDict) { return NO; }
 
-    if(hasPackage){
-        BOOL isOK = [self newThemeCacheSaveJsonDict:tempJsonDict];
+    if(hasPackage && fileUtil.themePath){
+        BOOL isOK = [fileUtil saveThemeDict:tempJsonDict]; // 保存到缓存目录.
         if (isOK) {
-            return [[WSTheme sharedObject] addThemeWithPackageList:@[[self newThemeCacheMainPath:NO]] withThemeNamList:@[newName]];
+            // 添加到theme主题列表中.
+            return [[WSTheme sharedObject] addThemeWithPackageList:@[[fileUtil themePath]] withThemeNamList:@[newName]];
         }
         return NO;
     }
@@ -210,8 +240,12 @@ static NSDictionary *templateJsonDict;
 }
 
 
-// 复制目录到此时,需要删除原目录.
-+(NSString *)newThemeCacheMainPath:(BOOL)needClear
+
+
+
+
+    // 复制目录到此时,需要删除原目录.
++(NSString *)newThemeMainPath:(BOOL)needClear
 {
     NSString *tempPath = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"tempNewTheme"];
     if(needClear){
@@ -220,62 +254,12 @@ static NSDictionary *templateJsonDict;
             [fm removeItemAtPath:tempPath error:nil];
         }
     }
-//    [fm createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:nil];
+        //    [fm createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:nil];
     return tempPath;
 }
 
-+(NSString *)newThemeCacheResourcePath:(NSString *)fileName
-{
-    NSString *fileFolderPath = [[self newThemeCacheMainPath:NO] stringByAppendingPathComponent:@"files"];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if (![fm fileExistsAtPath:fileFolderPath]) {
-        [fm createDirectoryAtPath:fileFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-    if (fileName) {
-        return [fileFolderPath stringByAppendingPathComponent:fileName];
-    }
-    return fileFolderPath;
-}
 
-+(BOOL)newThemeCacheSaveResource:(NSData *)theData forFileName:(NSString *)fileName
-{
-    if (theData && fileName) {
-        NSString *filePath = [self newThemeCacheResourcePath:fileName];
-        return [theData writeToFile:filePath atomically:YES];
-    }
-    return NO;
-}
 
-+(NSData *)newThemeCacheGetResourceWithFileName:(NSString *)fileName
-{
-    if (fileName) {
-        NSString *filePath = [self newThemeCacheResourcePath:fileName];
-        return [NSData dataWithContentsOfFile:filePath];
-    }
-    return nil;
-}
-
-+(BOOL)newThemeCacheRemoveResourceWithFileName:(NSString *)fileName
-{
-    NSString *filePath = [self newThemeCacheResourcePath:fileName];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if ([fm fileExistsAtPath:filePath]) {
-        return [fm removeItemAtPath:filePath error:nil];
-    }
-    return YES;
-}
-
-+(BOOL)newThemeCacheSaveJsonDict:(NSDictionary *)theJsonDict
-{
-    if ([theJsonDict isKindOfClass:[NSDictionary class]]) {
-        NSData *fileData = [NSJSONSerialization dataWithJSONObject:theJsonDict options:0 error:nil];
-        if (fileData) {
-            NSString *filePath = [[self newThemeCacheMainPath:NO] stringByAppendingPathComponent:@"theme.json"];
-            return [fileData writeToFile:filePath atomically:YES];
-        }
-    }
-    return NO;
-}
 
 @end
 
@@ -345,15 +329,17 @@ static NSDictionary *templateJsonDict;
     return item;
 }
 
++(NSArray *)itemTypeList
+{
+    static NSArray *typeStrArr;
+    if (!typeStrArr) { typeStrArr = ThemeEditItemModelTypeList; }
+    return typeStrArr;
+}
 +(ThemeEditItemType)parseItemType:(NSString *)typeStr
 {
     if (typeStr) {
         // color,text,image,font,num,dict,node 字符显示
-        static NSArray *typeStrArr;
-        if (!typeStrArr) {
-            typeStrArr = @[@"none", @"node", @"color", @"text", @"font", @"image",@"data", @"num", @"dict"];
-        }
-        NSInteger index = [typeStrArr indexOfObject:typeStr];
+        NSInteger index = [[self itemTypeList] indexOfObject:typeStr];
         if (index != NSNotFound) {
             return (ThemeEditItemType)index;
         }
@@ -363,10 +349,7 @@ static NSDictionary *templateJsonDict;
 
 +(NSString *)getItemTypeStr:(ThemeEditItemType)type
 {
-        static NSArray *typeStrArr;
-        if (!typeStrArr) {
-            typeStrArr = @[@"none", @"node", @"color", @"text", @"font", @"image",@"data", @"num", @"dict"];
-        }
+        NSArray *typeStrArr = [self itemTypeList];
     if (typeStrArr.count>type) {
         return typeStrArr[type];
     }
@@ -406,60 +389,32 @@ return [[WSTheme sharedObject].currentThemeModel createAttributes:self.value];
 // -----反向注册 ----
 -(NSString *)parseColor:(UIColor *)theColor
 {
-    NSString *tempStr;
-    if (theColor) {
-        CGFloat r,g,b,a;
-        [theColor getRed:&r green:&g blue:&b alpha:&a];
-        int R,G,B,A;
-        R = roundf(r*255);G= roundf(g*255);B= roundf(b*255);A= roundf(a*255);
-        if (A < 255) {
-            tempStr =[NSString stringWithFormat:@"#%.2X%.2X%.2X%.2X",A,R,G,B];
-        }else{
-            tempStr =[NSString stringWithFormat:@"#%.2X%.2X%.2X",R,G,B];
-        }
-    }
-    return tempStr;
+    return [[WSTheme sharedObject].currentThemeModel parseColor:theColor];
 }
 
 -(NSString *)parseFont:(UIFont *)theFont
 {
-    static UIFont *tempSystemFont=nil;
-    if (!tempSystemFont) {
-        tempSystemFont = [UIFont systemFontOfSize:[UIFont systemFontSize]];
-    }
-    if ([tempSystemFont.fontName isEqualToString:theFont.fontName]) {
-        return (id)@(theFont.pointSize);
-    }
-    return [NSString stringWithFormat:@"%@:%.0f",theFont.fontName,theFont.pointSize];
+    return [[WSTheme sharedObject].currentThemeModel parseFont:theFont];
 }
 
 -(NSString *)parseImage:(UIImage *)theImage withName:(NSString *)theName
 {
-//    NSString *resPath = [[self themeFileUtil] themeResourcePath:_name fileName:theName];
-//    [UIImagePNGRepresentation(theImage) writeToFile:resPath atomically:YES];
-    return theName;
+return [[WSTheme sharedObject].currentThemeModel parseImage:theImage withName:theName];
 }
 
 -(NSString *)parseData:(NSData *)theData withName:(NSString *)theName
 {
-//    NSString *resPath = [[self themeFileUtil] themeResourcePath:_name fileName:theName];
-//    [theData writeToFile:resPath atomically:YES];
-    return theName;
+return [[WSTheme sharedObject].currentThemeModel parseData:theData withName:theName];
 }
 
 -(NSDictionary *)parseAttributes:(NSDictionary *)theAttributes
 {
-        //    NSMutableDictionary *tempDict = [[NSMutableDictionary alloc] initWithCapacity:theAttributes.count];
-        //    [theAttributes enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL * _Nonnull stop) {
-        //        [tempDict setObject:obj forKey:key];
-        //    }];
-    return nil;
+return [[WSTheme sharedObject].currentThemeModel parseAttributes:theAttributes];
 }
 
 -(id)parseJsonText:(NSString *)theJsonText
 {
-    id jsonObj = [NSJSONSerialization JSONObjectWithData:[theJsonText dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
-    return jsonObj?:theJsonText;
+    return [[WSTheme sharedObject].currentThemeModel parseJsonText:theJsonText];
 }
 
 @end

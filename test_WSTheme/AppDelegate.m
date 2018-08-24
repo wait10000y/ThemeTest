@@ -21,49 +21,12 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-//    UIFont *temp = [UIFont systemFontOfSize:20];
-//
-// NSNumber *num1 = [TransDataUtils parseNumberWithValue:@"12345"];
-//    NSNumber *num2 = [TransDataUtils performSelector:@selector(parseNumberWithValue:) withObject:@"56789"];
-//
-//    NSLog(@"==== num1:%@ , num2:%@ ====",num1,num2);
-//
-//
-//        // TODO:test
-//    NSLog(@"==== 默认字体:%@ , name:%@ ,fName:%@ ====",temp,temp.fontName,temp.familyName);
-//
-//
-//
-//
-//    TestCoderObject *tc1 = [TestCoderObject new];
-//    tc1.name = @"name123";
-//    tc1.titles = @[@"title123"];
-//
-////    TestCoderObject *tc2 = [TestCoderObject new];
-////    tc2.name = @"name456";
-////    tc2.titles = @[@"title456"];
-//
-//    NSData *arc1 = [NSKeyedArchiver archivedDataWithRootObject:tc1];
-//
-//    TestCoderObject *tempTc1 = [NSKeyedUnarchiver unarchiveObjectWithData:arc1];
-//
-//    NSLog(@"----tc1: name:%@, title:%@ ----",tempTc1.name,tempTc1.titles);
 
 
 
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"/test1/test2.plist"];
+    path = [path stringByAppendingPathComponent:@"/test2.plist"];
 
-
-    BOOL isOK = NO;
-    NSData *tempData = [NSKeyedArchiver archivedDataWithRootObject:@"我是一个字符串123456"];
-    isOK = [[NSFileManager defaultManager] createFileAtPath:path contents:tempData attributes:nil];
-//    if(![[NSFileManager defaultManager] fileExistsAtPath:path]){
-//    }
-
-//    BOOL isOK = [NSKeyedArchiver archiveRootObject:@"我是一个字符串123456" toFile:path];
-
-    NSLog(@"==== 写文件是否成功:%d ====",isOK);
 
 
     [self loadWSThemeTestData];
@@ -114,18 +77,14 @@
         [[WSTheme sharedObject] addThemeWithJsonDictList:@[defaultObject,yivianObject] withNameList:@[@"默认主题",@"yivian主题"]];
     }
 
-    // 为主题添加模板定义文件.
-    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"default_tl"] forName:@"默认主题"];
-    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"yivian_tl"] forName:@"yivian主题"];
-    [[WSTheme sharedObject] setThemeTemplateDict:[self loadResourceTheme:@"default_tl"] forName:nil]; // 全局默认模板
-
     // 指定加载默认主题.
     NSString *lastName = [WSTheme sharedObject].currentThemeName?:@"默认主题";
     [[WSTheme sharedObject] startTheme:lastName];
 
+    
     // 编辑时,不可删除,修改的主题.
-    [ThemeEditManager setSystemThemeNames:@[@"默认主题",@"yivian主题"]];
-    // 编辑时,加载默认模板.
+    [ThemeEditManager setFixedThemeNames:@[@"默认主题",@"yivian主题"]];
+    // 编辑时,加载样式描述模板.
     [ThemeEditManager setThemeTemplateDefault:[self loadResourceTheme:@"default_tl"]];
 
 }

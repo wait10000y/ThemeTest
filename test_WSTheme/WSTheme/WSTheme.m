@@ -8,354 +8,207 @@
 
 #import "WSTheme.h"
 
+NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton";
 
 #define NSLog(format, ...) do {(NSLog)((format), ##__VA_ARGS__);} while (0)
-
 #define isNull(_obj) (_obj==nil || _obj == (id)[NSNull null])
+#define isJsonObject(_obj) ([_obj isKindOfClass:[NSDictionary class]] || [_obj isKindOfClass:[NSArray class]])
 
 #define WSThemeUpdateMaxThreadNumber 16 // 线程池大小
 
-NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton";
-/**
- 主题目录.
- WSTheme/themeList/[thmename]/
 
- WSTheme/themeList/[thmename]/theme.json
- WSTheme/themeList/[thmename]/theme_tl.json
- WSTheme/themeList/[thmename]/files/...
+@implementation WSThemeFile
 
- 缓存目录
- WSTheme/cacheFiles/[thmename]/files/[keypath]
+-(instancetype)initWithThemePackagePath:(NSString *)thePath
+{
+    self = [super init];
+    if (self) {
+        [self setThemePackagePath:thePath];
+    }
+    return self;
+}
 
-archive数据目录
- WSTheme/archiveData/fileName
-当前主题名称地址
- WSTheme/archiveData/_themeNameCurrent
- 主题列表地址
- WSTheme/archiveData/_themeNameList
- */
+-(instancetype)initWithThemeName:(NSString *)theThemeName
+{
+    self = [super init];
+    if (self) {
+        _themePath = [WSThemeFile themeMainPath:theThemeName];
+    }
+    return self;
+}
 
-#define WSThemeFileManager_themeThemeListMainPath @"WSTheme/themeList"
-#define WSThemeFileManager_themeCacheFileMainPath @"WSTheme/cacheFiles"
-#define WSThemeFileManager_themeArchiveDataMainPath @"WSTheme/archiveFiles"
+-(void)setThemePackagePath:(NSString *)thePath
+{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if (![fm fileExistsAtPath:thePath]) {
+        [fm createDirectoryAtPath:thePath withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    _themePath = thePath;
+}
+-(void)setThemePackagePathWithName:(NSString *)theThemeName
+{
+    _themePath = [WSThemeFile themeMainPath:theThemeName];
+}
 
-#define WSThemeFileManager_themeJsonName @"theme.json"
-#define WSThemeFileManager_themeTemplateJsonName @"theme_tl.json"
-#define WSThemeFileManager_themeResourceName @"files"
+-(NSDictionary *)loadThemeDict
+{
+    NSData *tempData = [NSData dataWithContentsOfFile:[self getThemeDictPath]];
+    if (tempData) {
+        return [NSJSONSerialization JSONObjectWithData:tempData options:0 error:nil];
+    }
+    return nil;
+}
 
-#define WSThemeFileManager_themeNameListName @"_themeNameList.plist"
-#define WSThemeFileManager_themeNameCurrentName @"_themeNameCurrent.txt"
+-(NSData *)loadThemeResourceWithName:(NSString *)fileName
+{
+    if (fileName) {
+        return [NSData dataWithContentsOfFile:[self getThemeResourcePathWithName:fileName]];
+    }
+    return nil;
+}
 
-@interface WSThemeFileManager:NSObject
+-(NSData *)loadThemeCacheFileWithName:(NSString *)fileName
+{
+    if (fileName) {
+        return [NSData dataWithContentsOfFile:[self getThemeCachePathWithName:fileName]];
+    }
+    return nil;
+}
 
-    // +======+ tools +======+
-    // object为nil时,删除操作 通用操作.
--(BOOL)saveObject:(id)object withKey:(NSString *)key;
--(id)getObjectForKey:(NSString*)key;
+-(BOOL)saveThemeDict:(NSDictionary *)themeDict
+{
+    if (isJsonObject(themeDict)) {
+        NSData *fileData = [NSJSONSerialization dataWithJSONObject:themeDict options:0 error:nil];
+        if (fileData) {
+            return [fileData writeToFile:[self getThemeDictPath] atomically:YES];
+        }
+    }
+    return NO;
+}
 
-    // 主题列表和当前主题记录.
--(NSArray *)themeNameList;
--(NSString *)themeCurrentName;
--(BOOL)themeNameListSave:(NSArray *)themeNameList;
--(BOOL)themeCurrentNameSave:(NSString *)themeName;
+-(BOOL)saveThemeResourceData:(NSData *)theData withName:(NSString *)fileName
+{
+    if (fileName) {
+        if (theData) {
+            return [theData writeToFile:[self getThemeResourcePathWithName:fileName] atomically:YES];
+        }else{
+            NSString *tempPath = [self getThemeResourcePathWithName:fileName];
+            NSFileManager *fm = [NSFileManager defaultManager];
+            if ([fm fileExistsAtPath:tempPath]) {
+                return [fm removeItemAtPath:tempPath error:nil];
+            }
+            return YES;
+        }
+    }
+    return NO;
+}
 
-    // 保存jsonDict
--(BOOL)themeSaveJsonDict:(NSDictionary *)jsonDict forTheme:(NSString *)themeName;
-    // 保存TemplateDict,如果themeName为空,表示保存全局模板Template.
--(BOOL)themeSaveTemplateDict:(NSDictionary *)jsonDict forTheme:(NSString *)themeName;
-    // 保存一个主题目录到主题列表中,使用[themeName]命名.
--(BOOL)themeSaveFilePackage:(NSString *)filePackagePath forTheme:(NSString *)themeName;
-    //读取theme定义TemplateDict
--(NSDictionary *)themeGetTemplateDict:(NSString *)themeName;
-    // 读取theme定义jsonDict
--(NSDictionary *)themeGetJsonDict:(NSString *)themeName;
+-(BOOL)saveThemeResourceFile:(NSString *)theFilePath withName:(NSString *)fileName
+{
+    if (fileName) {
+        NSString *tempPath = [self getThemeResourcePathWithName:fileName];
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:theFilePath]) {// theFilePath存在数据就是保存
+            return [fm copyItemAtPath:theFilePath toPath:tempPath error:nil];
+        }else{
+            if ([fm fileExistsAtPath:tempPath]) {
+                return [fm removeItemAtPath:tempPath error:nil];
+            }
+            return YES;
+        }
+    }
+    return NO;
+}
 
-    // 保存缓存或资源文件.
--(BOOL)themeSaveCacheFile:(NSData *)theFile themeName:(NSString *)themeName fileName:(NSString *)fileName;
--(BOOL)themeSaveResourceFile:(NSData *)theFile themeName:(NSString *)themeName fileName:(NSString *)fileName;
-    // 读取缓存的数据,不存在时返回nil.
--(NSData *)themeCachedFile:(NSString *)themeName fileName:(NSString *)fileName;
--(NSData *)themeResource:(NSString *)themeName fileName:(NSString *)fileName;
+-(BOOL)saveThemeCacheData:(NSData *)theData withName:(NSString *)fileName
+{
+    NSString *filePath = [self getThemeCachePathWithName:fileName];
+    if (theData) { // 添加,修改
+        return [theData writeToFile:filePath atomically:YES];
+    }else{ // 删除
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:filePath]) {
+            [fm removeItemAtPath:filePath error:nil];
+        }
+        return YES;
+    }
+    return NO;
+}
 
-    // 删除一个主题的所有文件和目录.
--(BOOL)themeRemove:(NSString *)themeName;
-    // 复制一份新theme.
--(BOOL)themeCopyFrom:(NSString *)theThemeName withNewThemeName:(NSString *)newThemeName;
+-(BOOL)removeTheme
+{
+    if (_themePath) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:_themePath]) {
+            return [fm removeItemAtPath:_themePath error:nil];
+        }
+    }
+    return YES;
+}
 
-    // 清理缓存cacheData目录和archiveData目录中所有缓存内容.
--(BOOL)clearAllCacheData;
-    // 删除所有theme的资源文件.
--(BOOL)clearThemes;
+-(BOOL)copyThemeToPackagePath:(NSString *)thePath
+{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if ([fm fileExistsAtPath:_themePath]) {
+        if ([fm fileExistsAtPath:thePath]) { // 清除内容.
+            [fm removeItemAtPath:thePath error:nil];
+            NSString *tempPath = [thePath stringByDeletingLastPathComponent];
+            if (![fm fileExistsAtPath:tempPath]) {
+                [fm createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:nil];
+            }
+        }
+        BOOL isOK = [fm copyItemAtPath:_themePath toPath:thePath error:nil];
+        if (isOK) {// 删除缓存.
+            [fm removeItemAtPath:[thePath stringByAppendingPathComponent:WSThemeFileManager_themeCacheFilesPath] error:nil];
+        }
+        return isOK;
+    }
+    return NO;
+}
 
-    // +======+ 目录工具 +======+
 
-    // 主题列表保存路径
-- (NSString *)themeNameListPath;
-    // 当前主题保存路径
-- (NSString *)themeCurrentNamePath;
+// ----- path utils -------
 
-    // 主题 cache文件路径
-- (NSString *)themeCacheFilePath:(NSString *)themeName fileName:(NSString *)fileName;
     // 主题 资源文件路径
-- (NSString *)themeResourcePath:(NSString *)themeName fileName:(NSString *)fileName;
+- (NSString *)getThemeResourcePathWithName:(NSString *)fileName
+{
+    NSString *tempPath = [_themePath stringByAppendingPathComponent:WSThemeFileManager_themeResourcePath];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if (![fm fileExistsAtPath:tempPath]) {
+        [fm createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    return fileName?[tempPath stringByAppendingPathComponent:fileName]:fileName;
+}
 
-    // 主题 Template路径
-- (NSString *)themeTemplateDictPath:(NSString *)themeName;
+- (NSString *)getThemeCachePathWithName:(NSString *)fileName
+{
+    NSString *tempPath = [_themePath stringByAppendingPathComponent:WSThemeFileManager_themeCacheFilesPath];
+    if (fileName) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if (![fm fileExistsAtPath:tempPath]) {
+            [fm createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+        return [tempPath stringByAppendingPathComponent:fileName];
+    }
+    return tempPath;
+}
+
     // 主题 json路径
-- (NSString *)themeJsonDictPath:(NSString *)themeName;
+- (NSString *)getThemeDictPath
+{
+    return [_themePath stringByAppendingPathComponent:WSThemeFileManager_themeJsonName];
+}
 
     // 返回theme主目录,如果不存在自动创建.
-- (NSString *)themeMainPath:(NSString *)themeName;
-
-    // 主题主目录+themeName目录,传值nil返回主目录.
-    // isCreate 是否自动创建不存在的目录.
-    // isClear 是否清空已存在的文件.
-- (NSString *)themeMainPath:(NSString *)themeName isAutoCreate:(BOOL)isCreate isClear:(BOOL)isClear;
-
-@end
-
-@implementation WSThemeFileManager
-
-
-
-    // ================= tools =================
-
--(BOOL)themeNameListSave:(NSArray *)themeNameList
-{
-    return [themeNameList writeToFile:[self themeNameListPath] atomically:YES];
-}
-
--(BOOL)themeCurrentNameSave:(NSString *)themeName
-{
-    return [themeName writeToFile:[self themeCurrentNamePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-}
-
--(NSArray *)themeNameList
-{
-    NSArray *tempArr = [NSArray arrayWithContentsOfFile:[self themeNameListPath]];
-    if (tempArr.count==0) {
-        // 遍历所有theme目录.
-        NSArray *themeNameItems = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[self themeMainPath:nil] error:nil];
-        tempArr = themeNameItems;
-        if (tempArr.count>0) {
-            [self themeNameListSave:tempArr];
-        }
-    }
-    return tempArr;
-}
-
--(NSString *)themeCurrentName
-{
-    return [NSString stringWithContentsOfFile:[self themeCurrentNamePath] encoding:NSUTF8StringEncoding error:nil];
-}
-
-
-    // 保存jsonDict
--(BOOL)themeSaveJsonDict:(NSDictionary *)jsonDict forTheme:(NSString *)themeName
-{
-    if ([jsonDict isKindOfClass:[NSDictionary class]]) {
-        NSData *fileData = [NSJSONSerialization dataWithJSONObject:jsonDict options:0 error:nil];
-        if (fileData) {
-            return [fileData writeToFile:[self themeJsonDictPath:themeName] atomically:YES];
-        }
-    }
-    return NO;
-}
-
-    // 保存TemplateDict,如果themeName为空,表示保存全局模板Template.
--(BOOL)themeSaveTemplateDict:(NSDictionary *)jsonDict forTheme:(NSString *)themeName
-{
-    if ([jsonDict isKindOfClass:[NSDictionary class]]) { 
-        NSData *fileData = [NSJSONSerialization dataWithJSONObject:jsonDict options:0 error:nil];
-        if (fileData) {
-            return [fileData writeToFile:[self themeTemplateDictPath:themeName] atomically:YES];
-        }
-    }
-    return NO;
-}
-
-// 保存一个主题目录到主题列表中,使用[themeName]命名.
--(BOOL)themeSaveFilePackage:(NSString *)filePackagePath forTheme:(NSString *)themeName
-{
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *jsonDictPath = [filePackagePath stringByAppendingPathComponent:WSThemeFileManager_themeJsonName];
-    if ([fm fileExistsAtPath:jsonDictPath]) { // 存在必要文件的主题.
-        return [fm copyItemAtPath:filePackagePath toPath:[self themeMainPath:themeName isAutoCreate:NO isClear:YES] error:nil];
-    }
-    return NO;
-}
-
-    //读取theme定义TemplateDict
--(NSDictionary *)themeGetTemplateDict:(NSString *)themeName
-{
-    NSData *tempData = [NSData dataWithContentsOfFile:[self themeTemplateDictPath:themeName]];
-    if (!tempData) {
-        tempData = [NSData dataWithContentsOfFile:[self themeTemplateDictPath:nil]];
-    }
-    if (tempData) {
-        return [NSJSONSerialization JSONObjectWithData:tempData options:0 error:nil];
-    }
-    return nil;
-}
-
-    // 读取theme定义jsonDict
--(NSDictionary *)themeGetJsonDict:(NSString *)themeName
-{
-    NSData *tempData = [NSData dataWithContentsOfFile:[self themeJsonDictPath:themeName]];
-    if (tempData) {
-        return [NSJSONSerialization JSONObjectWithData:tempData options:0 error:nil];
-    }
-    return nil;
-}
-
-
-    // 保存缓存或资源文件.
--(BOOL)themeSaveCacheFile:(NSData *)theFile themeName:(NSString *)themeName fileName:(NSString *)fileName
-{
-    if (theFile) {
-        return [theFile writeToFile:[self themeCacheFilePath:themeName fileName:fileName] atomically:YES];
-    }
-    return NO;
-}
-
--(BOOL)themeSaveResourceFile:(NSData *)theFile themeName:(NSString *)themeName fileName:(NSString *)fileName
-{
-    if (theFile) {
-        return [theFile writeToFile:[self themeResourcePath:themeName fileName:fileName] atomically:YES];
-    }
-    return NO;
-}
-
-    // 读取缓存的数据,不存在时返回nil.
--(NSData *)themeCachedFile:(NSString *)themeName fileName:(NSString *)fileName
-{
-    NSString *filePath = [self themeCacheFilePath:themeName fileName:fileName];
-    BOOL isDir = NO;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDir] && !isDir) {
-        return [NSData dataWithContentsOfFile:filePath];
-    }
-    return nil;
-}
-
--(NSData *)themeResource:(NSString *)themeName fileName:(NSString *)fileName
-{
-    NSString *filePath = [self themeResourcePath:themeName fileName:fileName];
-    BOOL isDir = NO;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDir] && !isDir) {
-        return [NSData dataWithContentsOfFile:filePath];
-    }
-    return nil;
-}
-
-
-    // 删除一个主题的所有文件和目录.
--(BOOL)themeRemove:(NSString *)themeName
-{
-    [self themeMainPath:themeName isAutoCreate:NO isClear:YES];
-    return YES;
-}
-
-    // 复制一份新theme.
--(BOOL)themeCopyFrom:(NSString *)theThemeName withNewThemeName:(NSString *)newThemeName
-{
-    NSFileManager *fm = [NSFileManager defaultManager];
-    return [fm copyItemAtPath:[self themeMainPath:theThemeName] toPath:[self themeMainPath:newThemeName isAutoCreate:NO isClear:YES] error:nil];
-}
-
-    // object为nil时,删除操作
--(BOOL)saveObject:(id)object withKey:(NSString *)key
-{
-    if (key==nil) {return NO;}
-    NSString *dataPath = [[self themeArchiveObjectMainPath:nil isClear:NO] stringByAppendingPathComponent:key];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if (object) { // 添加或覆盖
-        return [NSKeyedArchiver archiveRootObject:object toFile:dataPath];
-    }else{ // 删除
-        if ([fm fileExistsAtPath:dataPath]) {
-            return [fm removeItemAtPath:dataPath error:nil];
-        }
-    }
-    return NO;
-}
-
-// 删除所有theme的资源文件.
--(BOOL)clearThemes
-{
-    [self themeMainPath:nil isAutoCreate:NO isClear:YES];
-    return YES;
-}
-
-// 清理缓存cacheData目录和archiveData目录.
--(BOOL)clearAllCacheData
-{
-//    [self themeArchiveObjectMainPath:nil isClear:YES];
-    [self themeCacheMainPath:nil isClear:YES];
-    return YES;
-}
-
--(id)getObjectForKey:(NSString*)key
-{
-    if (key==nil) {return nil;}
-    NSString *dataPath = [[self themeArchiveObjectMainPath:nil isClear:NO] stringByAppendingPathComponent:key];
-    return [NSKeyedUnarchiver unarchiveObjectWithFile:dataPath];
-}
-    // =================== 目录工具 ===================
-    // 主题列表保存路径
-- (NSString *)themeNameListPath
-{
-    NSString *basePath = [self themeMainPath:nil];
-    return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeNameListName];
-}
-
-    // 当前主题保存路径
-- (NSString *)themeCurrentNamePath
-{
-    NSString *basePath = [self themeMainPath:nil];
-    return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeNameCurrentName];
-}
-
-    // 主题 cache路径(大文件等)
-    // themeName 主题名称. 指定主题. 如果名称为nil 返回全局cache/
-    // fileName 缓存文件的名称.
-    // 主题 cache文件路径
-- (NSString *)themeCacheFilePath:(NSString *)themeName fileName:(NSString *)fileName
-{
-    NSString *basePath = [self themeCacheMainPath:themeName?[NSString stringWithFormat:@"%@",themeName]:nil isClear:NO];
-    return fileName?[basePath stringByAppendingPathComponent:fileName]:basePath;
-}
-
-    // 主题 资源文件路径
-- (NSString *)themeResourcePath:(NSString *)themeName fileName:(NSString *)fileName
-{
-    NSString *basePath = [self themeMainPath:[NSString stringWithFormat:@"%@/%@",themeName,WSThemeFileManager_themeResourceName]];
-    return fileName?[basePath stringByAppendingPathComponent:fileName]:basePath;
-}
-
-    // 主题 模板路径
-- (NSString *)themeTemplateDictPath:(NSString *)themeName
-{
-    NSString *basePath = [self themeMainPath:themeName];
-    return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeTemplateJsonName];
-}
-
-    // 主题 json路径
-- (NSString *)themeJsonDictPath:(NSString *)themeName
-{
-    NSString *basePath = [self themeMainPath:themeName];
-    return [basePath stringByAppendingPathComponent:WSThemeFileManager_themeJsonName];
-}
-
-// 返回theme主目录,如果不存在自动创建.
-- (NSString *)themeMainPath:(NSString *)themeName
++ (NSString *)themeMainPath:(NSString *)themeName
 {
     return [self themeMainPath:themeName isAutoCreate:YES isClear:NO];
 }
 
-
     // 主题主目录+themeName目录,传值nil返回主目录.
     // isCreate 是否自动创建不存在的目录.
     // isClear 是否清空已存在的文件.
-- (NSString *)themeMainPath:(NSString *)themeName isAutoCreate:(BOOL)isCreate isClear:(BOOL)isClear
++ (NSString *)themeMainPath:(NSString *)themeName isAutoCreate:(BOOL)isCreate isClear:(BOOL)isClear
 {
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]; // NSDocumentDirectory
     path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",WSThemeFileManager_themeThemeListMainPath,themeName?:@""]];
@@ -378,42 +231,69 @@ archive数据目录
     return path;
 }
 
-// 缓存等 主路径
--(NSString *)themeCacheMainPath:(NSString *)themeName isClear:(BOOL)isClear
++(BOOL)themeNameListSave:(NSArray *)themeNameList
 {
-    NSString *path = NSTemporaryDirectory();
-    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",WSThemeFileManager_themeCacheFileMainPath,themeName?:@""]];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if(![fm fileExistsAtPath:path]){
-        if (!isClear) {
-            [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-        }
-    }else if(isClear){
-        [fm removeItemAtPath:path error:nil];
-    }
-    return path;
+    NSString *basePath = [[self themeMainPath:nil] stringByAppendingPathComponent:WSThemeFileManager_themeNameListName];
+    return [themeNameList writeToFile:basePath atomically:YES];
 }
-// archive文件等 主路径
--(NSString *)themeArchiveObjectMainPath:(NSString *)themeName isClear:(BOOL)isClear
+
++(BOOL)themeCurrentNameSave:(NSString *)themeName
 {
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",WSThemeFileManager_themeArchiveDataMainPath,themeName?:@""]];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if(![fm fileExistsAtPath:path]){
-        if (!isClear) {
-            [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-        }
-    } if(isClear){
-        [fm removeItemAtPath:path error:nil];
-    }
-    return path;
+    NSString *basePath = [[self themeMainPath:nil] stringByAppendingPathComponent:WSThemeFileManager_themeNameCurrentName];
+    return [themeName writeToFile:basePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
 }
+
++(NSArray *)themeNameList
+{
+    NSString *basePath = [[self themeMainPath:nil] stringByAppendingPathComponent:WSThemeFileManager_themeNameListName];
+    NSArray *tempArr = [NSArray arrayWithContentsOfFile:basePath];
+    if (tempArr.count==0) {
+            // 遍历所有theme目录.
+        NSArray *themeNameItems = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[self themeMainPath:nil] error:nil];
+        tempArr = themeNameItems;
+        if (tempArr.count>0) {
+            [self themeNameListSave:tempArr];
+        }
+    }
+    return tempArr;
+}
+
++(NSString *)themeCurrentName
+{
+    NSString *basePath = [[self themeMainPath:nil] stringByAppendingPathComponent:WSThemeFileManager_themeNameCurrentName];
+    return [NSString stringWithContentsOfFile:basePath encoding:NSUTF8StringEncoding error:nil];
+}
+
++(BOOL)saveNewTheme:(NSString *)themeName withPackagePath:(NSString *)thePath
+{
+    if (themeName && thePath) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:thePath]) {
+            NSString *tempPath = [self themeMainPath:themeName isAutoCreate:NO isClear:YES];
+            return [fm copyItemAtPath:thePath toPath:tempPath error:nil];
+        }
+    }
+    return NO;
+}
+
++(BOOL)saveNewTheme:(NSString *)themeName withThemeDict:(NSDictionary *)themeDict
+{
+    if(themeName && isJsonObject(themeDict)){
+        NSData *fileData = [NSJSONSerialization dataWithJSONObject:themeDict options:0 error:nil];
+        if (fileData) {
+            NSString *dictPath = [[self themeMainPath:themeName] stringByAppendingPathComponent:WSThemeFileManager_themeJsonName];
+            return [fileData writeToFile:dictPath atomically:YES];
+        }
+    }
+    return NO;
+}
+
 @end
 
 
 @interface WSTheme()
 @property(nonatomic) NSOperationQueue *updateQueue; // 线程队列(读取json配置数据,转化类型)
-@property(nonatomic) WSThemeFileManager *themeFileUtil; // 文件处理工具.
+//@property(nonatomic) WSThemeFileManager *themeFileUtil; // 文件处理工具.
 @property(nonatomic) NSHashTable *delegateTable; // delegate列表.
 @property(nonatomic) NSHashTable *callBlockTable; // 事件队列.
 @end
@@ -451,12 +331,10 @@ archive数据目录
 {
         _updateQueue = [[NSOperationQueue alloc] init];
         _updateQueue.maxConcurrentOperationCount = WSThemeUpdateMaxThreadNumber;
-        _themeFileUtil = [WSThemeFileManager new];
 
     // 读取 记录的themeModel模板数据.
-    mThemeNameList = [NSMutableArray arrayWithArray:[_themeFileUtil themeNameList]];
-    currentName = [_themeFileUtil themeCurrentName];
-//    currentModel = [self themeModelForName:currentName];
+    mThemeNameList = [NSMutableArray arrayWithArray:[WSThemeFile themeNameList]];
+    currentName = [WSThemeFile themeCurrentName];
 }
 
 // json 转换成的object.
@@ -548,7 +426,7 @@ archive数据目录
     [self willChangeValueForKey:@"currentThemeName"];
     currentName = [theName copy];
     currentModel = [self themeModelForName:currentName];
-    [_themeFileUtil themeCurrentNameSave:currentName];
+    [WSThemeFile themeCurrentNameSave:currentName];
     [self didChangeValueForKey:@"currentThemeName"];// KVO消息
 
         // 消息推送
@@ -580,12 +458,14 @@ archive数据目录
 {
     BOOL addNum = 0;
     BOOL updateNum = 0;
+    WSThemeFile *tempFile = [WSThemeFile new];
     for (int it=0; it<nameList.count; it++) {
-        NSString *tempName = nameList[it];
+        NSString *tempName = [nameList[it] copy];
         NSDictionary *tempDict;
         if(dictList.count>it){ // 是否一一对应.
             tempDict = dictList[it];
-            BOOL hasSaved = [_themeFileUtil themeSaveJsonDict:tempDict forTheme:tempName];
+            [tempFile setThemePackagePathWithName:tempName];
+            BOOL hasSaved = [tempFile saveThemeDict:tempDict];
             if (hasSaved) {
                 if ([mThemeNameList containsObject:tempName]) { // 更新
                     updateNum ++;
@@ -599,7 +479,7 @@ archive数据目录
 
     NSLog(@"主题添加:%d 个,更新:%d 个,共有:%lu 个主题",addNum,updateNum,(unsigned long)mThemeNameList.count);
     if (addNum>0) {
-        [_themeFileUtil themeNameListSave:mThemeNameList];
+        [WSThemeFile themeNameListSave:mThemeNameList];
     }
     return (addNum+updateNum);
 }
@@ -607,14 +487,15 @@ archive数据目录
 -(BOOL)removeThemes:(NSArray<NSString *> *)nameList
 {
     BOOL subNum = 0;
+    WSThemeFile *tempFile = [WSThemeFile new];
     for (NSString *tempName in nameList) {
         if ([tempName isEqualToString:currentName]) { // 当前主题使用的不可删除.
             continue;
         }
         NSUInteger index = [mThemeNameList indexOfObject:tempName];
         if (index != NSNotFound) {
-            if ([_themeFileUtil themeRemove:tempName]) {
-                [_themeFileUtil themeCacheMainPath:tempName isClear:YES];
+            [tempFile setThemePackagePathWithName:tempName];
+            if ([tempFile removeTheme]) {
                 [mThemeNameList removeObjectAtIndex:index];
                 subNum ++;
             }
@@ -622,7 +503,7 @@ archive数据目录
     }
     NSLog(@"主题删除:%d 个,剩余:%lu 个",subNum,(unsigned long)mThemeNameList.count);
     if (subNum>0) {
-        [_themeFileUtil themeNameListSave:mThemeNameList];
+        [WSThemeFile themeNameListSave:mThemeNameList];
         return YES;
     }
     return NO;
@@ -655,7 +536,7 @@ archive数据目录
         }
         NSString *tempName = themeNameList[it];
         NSString *tempPath = packagePathList[it];
-        BOOL hasAdd = [_themeFileUtil themeSaveFilePackage:tempPath forTheme:tempName];
+        BOOL hasAdd = [WSThemeFile saveNewTheme:tempName withPackagePath:tempPath];
         if (hasAdd) {
             if ([mThemeNameList containsObject:tempName]) { // 更新
                 updateNum ++;
@@ -667,7 +548,7 @@ archive数据目录
     }
     NSLog(@"Package主题添加:%d 个,更新:%d 个,共有:%lu 个主题",addNum,updateNum,(unsigned long)mThemeNameList.count);
     if (addNum>0) {
-        [_themeFileUtil themeNameListSave:mThemeNameList];
+        [WSThemeFile themeNameListSave:mThemeNameList];
     }
     return addNum+updateNum;
 }
@@ -678,33 +559,8 @@ archive数据目录
     if ([currentModel.name isEqualToString:themeName]) {
         return currentModel;
     }
-    WSThemeModel *tempModel = [WSThemeModel createWithName:themeName];
-        //    [tempModel loadThemeDataWithName:themeName];
-    return tempModel;
+    return [WSThemeModel createWithName:themeName];
 }
-
--(BOOL)setThemeTemplateDict:(NSDictionary *)theDict forName:(NSString *)themeName
-{
-    return [_themeFileUtil themeSaveTemplateDict:theDict forTheme:themeName];
-}
-
-// 传空值时清理全部缓存,只清理大文件缓存目录内容(image,data等).
--(BOOL)clearCacheData:(NSArray *)themeNameList
-{
-    if(themeNameList.count>0){
-        for (NSString *tempName in themeNameList) {
-            if ([mThemeNameList containsObject:tempName]) {
-                [_themeFileUtil themeCacheMainPath:tempName isClear:YES];
-            }
-        }
-        return YES;
-    }else{
-        return [_themeFileUtil clearAllCacheData];
-    }
-    return NO;
-}
-
-
 
 @end
 
@@ -712,67 +568,78 @@ archive数据目录
 
 @interface WSThemeModel()
 @property(nonatomic) NSDictionary *mThemeDict; // json配置对象.
-
     // 缓存 已经转换后的对象,下次重复读取时,从这里加载;key: identifier; value: 已经转换后的内容
 @property(nonatomic) NSMutableArray *cacheDictList; // 位置与 WSThemeValueType数值一一对应.
-
+@property(nonatomic) WSThemeFile *themeFileUtil;
 @end
 
 @implementation WSThemeModel
 
+-(NSDictionary *)themeDict
+{
+    return _mThemeDict;
+}
 
 -(NSOperationQueue *)updateQueue
 {
     return [WSTheme sharedObject].updateQueue;
 }
 
--(WSThemeFileManager *)themeFileUtil
+- (instancetype)init
 {
-    return [WSTheme sharedObject].themeFileUtil;
+    self = [super init];
+    if (self) {
+        _themeFileUtil = [WSThemeFile new];
+    }
+    return self;
 }
 
 -(void)createDefaultData
 {
-    NSString *cachePath = [self.themeFileUtil themeCacheFilePath:_name fileName:[NSString stringWithFormat:@"%@.modelcache",_name]];
-    NSArray *tempArray = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePath];
+    // 检查物理缓存
+    NSData *tempData = [_themeFileUtil loadThemeCacheFileWithName:@"WSThemeModel_cachedDictList"];
+    NSArray *tempArray = [NSKeyedUnarchiver unarchiveObjectWithData:tempData];
+    if(![tempArray isKindOfClass:[NSArray class]]){ tempArray = nil; }
 
-    _cacheDictList = [[NSMutableArray alloc] initWithCapacity:WSThemeValueTypeNone];
-    for (int it=0; it<WSThemeValueTypeNone; it++) {
+    _cacheDictList = [[NSMutableArray alloc] initWithCapacity:WSThemeValueTypeOriginal];
+    for (int it=0; it<WSThemeValueTypeOriginal; it++) {
         NSDictionary *tempDict = (tempArray.count>it)?tempArray[it]:nil;
         [_cacheDictList addObject:[[NSMutableDictionary alloc] initWithDictionary:tempDict]];
     }
+}
+
++(instancetype)createWithPackagePath:(NSString *)thePath
+{
+    WSThemeModel *tempModel = [WSThemeModel new];
+    BOOL isOK = [tempModel loadThemeDataWithPackagePath:thePath];
+    NSLog(@"themePath 创建model:%@%@",tempModel,isOK?@"":@" 没有jsonDict定义.");
+    return tempModel; // 未定义json 也可以返回空.
+}
+
+-(BOOL)loadThemeDataWithPackagePath:(NSString *)thePath
+{
+    _name = [thePath lastPathComponent];
+    [_themeFileUtil setThemePackagePath:thePath];
+    _mThemeDict = [_themeFileUtil loadThemeDict];
+    [self createDefaultData];
+    return YES;
 }
 
 +(instancetype)createWithName:(NSString *)theName
 {
     WSThemeModel *tempModel = [WSThemeModel new];
     BOOL isOK = [tempModel loadThemeDataWithName:theName];
-    NSLog(@"创建model:%@%@",tempModel,isOK?@"":@" 没有jsonDict定义.");
+    NSLog(@"themeName 创建model:%@%@",tempModel,isOK?@"":@" 没有jsonDict定义.");
     return tempModel; // 未定义json 也可以返回空.
 }
+
 -(BOOL)loadThemeDataWithName:(NSString *)themeName
 {
     _name = themeName;
-    NSDictionary *jsonDict = [self.themeFileUtil themeGetJsonDict:themeName];
-    _mThemeDict = jsonDict;
+    [_themeFileUtil setThemePackagePathWithName:themeName];
+    _mThemeDict = [_themeFileUtil loadThemeDict];
     [self createDefaultData];
     return YES;
-}
-
-    // 返回当前theme定义的jsonDict内容.
--(NSDictionary *)themeJsonDict
-{
-    return _mThemeDict;
-}
-
--(NSDictionary *)themeTemplateDict
-{
-    return [self.themeFileUtil themeGetTemplateDict:_name];
-}
-
--(NSString *)themePackagePath
-{
-    return [self.themeFileUtil themeMainPath:_name];
 }
 
     // block 形式加载. 回调线程是 updateQueue 线程;
@@ -809,11 +676,11 @@ archive数据目录
         callSel = @selector(createColor:);
     }else if (type ==WSThemeValueTypeData){
         id tempValue = [_mThemeDict valueForKeyPath:identifier];
-        return [self createData:tempValue withIdentifier:identifier];
+        return [self createData:tempValue];
     }else if (type ==WSThemeValueTypeImage){
             //        callSel = @selector(createImage:);
         id tempValue = [_mThemeDict valueForKeyPath:identifier];
-        return [self createImage:tempValue withIdentifier:identifier];
+        return [self createImage:tempValue];
     }else if (type ==WSThemeValueTypeFont){
         callSel = @selector(createFont:);
     }else if (type ==WSThemeValueTypeAttribute){
@@ -853,7 +720,7 @@ archive数据目录
     // 内容 转换成 json格式的字符串形式.
 -(NSString *)createJsonText:(id)value
 {
-    if ([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]]) {
+    if (isJsonObject(value)) {
         NSData *tempData = [NSJSONSerialization dataWithJSONObject:value options:0 error:nil];
         if (tempData.length>0) {
             return [[NSString alloc] initWithData:tempData encoding:NSUTF8StringEncoding];
@@ -913,40 +780,11 @@ archive数据目录
 
 /**
  支持的文件名类型:
- "imgName" "imgName.jpg" "https://www.test.com/imgName.png"
+ "imgName" "imgName.jpg"
  */
 -(UIImage *)createImage:(NSString *)imgName
 {
-    return [self createImage:imgName withIdentifier:nil];
-}
-
-/**
- 支持的文件名类型:
- "imgName" "imgName.jpg" "https://www.test.com/imgName.png"
- */
--(UIImage *)createImage:(NSString *)imgName withIdentifier:(NSString *)identifier
-{
-    UIImage *tempImg;
-
-    if([imgName containsString:@"/"]){ // 可能需要延时加载.
-        if (identifier) {
-            tempImg = [UIImage imageWithContentsOfFile:[[self themeFileUtil] themeCacheFilePath:_name fileName:identifier]];
-            if (tempImg) { return tempImg; }
-        }
-        NSString *tempName = [imgName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *tempUrl = [NSURL URLWithString:tempName];
-        if(tempUrl){
-            NSData *tempData = [NSData dataWithContentsOfURL:tempUrl];
-            tempImg = [UIImage imageWithData:tempData];
-            if (identifier && tempImg) {
-                NSString *cachePath = [[self themeFileUtil] themeCacheFilePath:_name fileName:identifier];
-                [tempData writeToFile:cachePath atomically:YES];
-            }
-        }
-    }else{
-        tempImg = [UIImage imageWithContentsOfFile:[[self themeFileUtil] themeResourcePath:_name fileName:imgName]];
-    }
-
+    UIImage *tempImg = [UIImage imageWithContentsOfFile:[_themeFileUtil getThemeResourcePathWithName:imgName]];
     if (!tempImg) {
         tempImg = [UIImage imageNamed:imgName];
     }
@@ -956,42 +794,9 @@ archive数据目录
 // 读取data对象,数据类型同image.
 -(NSData *)createData:(NSString *)theDataName
 {
-    return [self createData:theDataName withIdentifier:nil];
-}
-// 读取data对象,数据类型同image.
--(NSData *)createData:(NSString *)theDataName withIdentifier:(NSString *)identifier
-{
-    NSData *tempData;
-
-    if([theDataName containsString:@"/"]){ // 可能需要延时加载.
-        if (identifier) {
-            tempData = [NSData dataWithContentsOfFile:[[self themeFileUtil] themeCacheFilePath:_name fileName:identifier]];
-            if (tempData) { return tempData; }
-        }
-        NSString *tempName = [theDataName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *tempUrl = [NSURL URLWithString:tempName];
-        if(tempUrl){
-            tempData = [NSData dataWithContentsOfURL:tempUrl];
-            if (identifier && tempData) {
-                NSString *cachePath = [[self themeFileUtil] themeCacheFilePath:_name fileName:identifier];
-                [tempData writeToFile:cachePath atomically:YES];
-            }
-        }
-    }else{
-        NSString *tempPath = [[self themeFileUtil] themeResourcePath:_name fileName:theDataName];
-        tempData = [NSData dataWithContentsOfFile:tempPath];
-    }
-
-    if (!tempData) {
-        NSString *tempPath = [[NSBundle mainBundle] pathForResource:theDataName ofType:nil];
-        if (tempPath) {
-            tempData = [NSData dataWithContentsOfFile:tempPath];
-        }
-    }
-
+    NSData *tempData = [NSData dataWithContentsOfFile:[_themeFileUtil getThemeResourcePathWithName:theDataName]];
     return tempData;
 }
-
 
 /**
  支持 NSAttributedString.h 定义的 attributeName字符串转换的key.
@@ -1099,14 +904,14 @@ archive数据目录
 
 -(NSString *)parseImage:(UIImage *)theImage withName:(NSString *)theName
 {
-    NSString *resPath = [[self themeFileUtil] themeResourcePath:_name fileName:theName];
+    NSString *resPath = [_themeFileUtil getThemeResourcePathWithName:theName];
     [UIImagePNGRepresentation(theImage) writeToFile:resPath atomically:YES];
     return theName;
 }
 
 -(NSString *)parseData:(NSData *)theData withName:(NSString *)theName
 {
-    NSString *resPath = [[self themeFileUtil] themeResourcePath:_name fileName:theName];
+    NSString *resPath = [_themeFileUtil getThemeResourcePathWithName:theName];
     [theData writeToFile:resPath atomically:YES];
     return theName;
 }
@@ -1135,10 +940,9 @@ archive数据目录
 -(void)dealloc
 {
     NSLog(@"model系统回收:%@",self);
-    if (_cacheDictList) {
-        NSString *cachePath = [self.themeFileUtil themeCacheFilePath:_name fileName:[NSString stringWithFormat:@"%@.modelcache",_name]];
-        NSData *tempData = [NSKeyedArchiver archivedDataWithRootObject:_cacheDictList];
-        [tempData writeToFile:cachePath atomically:YES];
+    if (_themeFileUtil && _cacheDictList.count>0) {
+        NSData *dictData = [NSKeyedArchiver archivedDataWithRootObject:_cacheDictList];
+        [_themeFileUtil saveThemeCacheData:dictData withName:@"WSThemeModel_cachedDictList"];
     }
     _mThemeDict = nil;
     _cacheDictList = nil;
@@ -1150,19 +954,16 @@ archive数据目录
 
 
 @interface WSThemeConfig()
-
-    // 关联的更新对象.
-@property(nonatomic,weak) NSObject *currentObject;
-    // 记录当前使用的 model.
-@property(nonatomic,weak) WSThemeModel *currentModel;
+@property(nonatomic,weak) NSObject *currentObject; // 关联的更新对象.
+@property(nonatomic,weak) WSThemeModel *currentModel; // 记录当前使用的 model.
 @property(nonatomic,weak) NSOperationQueue *updateQueue; // [WSTheme sharedObject].updateQueue 的弱引用.
 @property(nonatomic) NSHashTable *operationList; // 保存正在执行和将要执行的NSOperation列表.
 @property(nonatomic) NSLock *opLock;
-// 注册的block列表缓存.
-// key: valueBlock;value: identifier;
-@property(nonatomic) NSMutableDictionary *customBlockDict;
+
+@property(nonatomic) NSMutableDictionary *customBlockDict; // 注册的block列表缓存. // key: valueBlock;value: identifier;
 
 @end
+
 @implementation WSThemeConfig
 
 - (instancetype)init
@@ -1228,19 +1029,6 @@ archive数据目录
         return weakSelf;
     };
 }
-
-
-//-(WSThemeConfigFixedTypeBlock)color
-//{
-//    __weak typeof(self) weakSelf = self;
-//    return ^(NSString *identifier,WSThemeConfigValueBlock valueBlock){
-//            // 保存,identifier对应的 configblock
-//        [weakSelf saveCustomBlock:valueBlock identifier:identifier valueType:WSThemeValueTypeColor];
-//            // 执行一次界面更新
-//        [weakSelf getValueFromMdodel:weakSelf.currentModel identifier:identifier valueType:WSThemeValueTypeColor valueBlock:valueBlock];
-//        return weakSelf;
-//    };
-//}
 
 -(WSThemeConfigFixedTypeBlock)fixedTypeBlock:(WSThemeValueType)valueType
 {
@@ -1348,20 +1136,18 @@ archive数据目录
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-static const NSString *WSThemeConfig_objectPropertyKey = @"WSThemeConfig_objectPropertyKey";
-
 @implementation NSObject(WSTheme)
 
 -(WSThemeConfig *)wsTheme
 {
-    WSThemeConfig *config = objc_getAssociatedObject(self, &WSThemeConfig_objectPropertyKey);
+    WSThemeConfig *config = objc_getAssociatedObject(self, __func__);
     if (!config) {
         @synchronized (self) {
-            WSThemeConfig *tempConfig = objc_getAssociatedObject(self, &WSThemeConfig_objectPropertyKey);
+            WSThemeConfig *tempConfig = objc_getAssociatedObject(self, __func__);
             if(!tempConfig){
                 tempConfig = [WSThemeConfig new];
                 tempConfig.currentObject = self;
-                objc_setAssociatedObject(self, &WSThemeConfig_objectPropertyKey, tempConfig , OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                objc_setAssociatedObject(self, __func__, tempConfig , OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 NSLog(@"开始绑定 WSThemeConfig:%@",tempConfig);
             }
             config = tempConfig;

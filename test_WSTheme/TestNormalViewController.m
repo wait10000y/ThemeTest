@@ -126,7 +126,7 @@
 
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        int addNum = 10;
+        int addNum = 100;
         for (int it=0; it<addNum; it++) {
             self.textLabel.wsTheme.custom(@"color.textColor", WSThemeValueTypeOriginal, ^(UILabel *item, NSString *value) {
                 NSString *nowStr = [NSString stringWithFormat:@"%@\t - %d\t",value,it];
