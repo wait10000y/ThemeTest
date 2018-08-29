@@ -176,15 +176,15 @@ typedef WSThemeConfig *(^WSThemeConfigFixedTypeBlock)(NSString *identifier,WSThe
 
 @interface WSThemeConfig:NSObject
 
-@property(nonatomic,copy,readonly) WSThemeConfigCustomBlock custom; // 自定义格式,nil空调用等.
+@property(nonatomic,readonly) WSThemeConfigCustomBlock custom; // 自定义格式,nil调用等.
 
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock original; // 原始值
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock text; // jsonText,description
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock color; // UIColor
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock font; // UIFont
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock image; // UIImage,nil
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock data; // NSData,nil
-@property(nonatomic,copy,readonly) WSThemeConfigFixedTypeBlock attribute; // dict
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock original; // 原始值
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock text; // jsonText,description
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock color; // UIColor
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock font; // UIFont
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock image; // UIImage,nil
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock data; // NSData,nil
+@property(nonatomic,readonly) WSThemeConfigFixedTypeBlock attribute; // dict
 
 @end
 
