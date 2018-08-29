@@ -65,8 +65,11 @@
 -(IBAction)actionShowThemeList:(id)sender
 {
     ThemeSelectViewController *selectVC = [ThemeSelectViewController new];
-    [self.navigationController pushViewController:selectVC animated:YES];
-    
+    UINavigationController *editNav = [[UINavigationController alloc] initWithRootViewController:selectVC];
+    [self presentViewController:editNav animated:YES completion:nil];
+
+//    [self.navigationController pushViewController:selectVC animated:YES];
+
 }
 
 // 跳测试界面
