@@ -47,6 +47,7 @@
 		6BBA4F8C2101BD8E00C481BB /* TestNormalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BBA4F8A2101BD8E00C481BB /* TestNormalViewController.m */; };
 		6BBA4F8D2101BD8E00C481BB /* TestNormalViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6BBA4F8B2101BD8E00C481BB /* TestNormalViewController.xib */; };
 		6BBA4F902101C17C00C481BB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BBA4F8F2101C17C00C481BB /* ViewController.m */; };
+		6BE5E3E621460B010042F563 /* LSTImagePreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BE5E3E421460B000042F563 /* LSTImagePreviewView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -116,6 +117,8 @@
 		6BBA4F8B2101BD8E00C481BB /* TestNormalViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TestNormalViewController.xib; sourceTree = "<group>"; };
 		6BBA4F8E2101C17C00C481BB /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		6BBA4F8F2101C17C00C481BB /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		6BE5E3E421460B000042F563 /* LSTImagePreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSTImagePreviewView.m; sourceTree = "<group>"; };
+		6BE5E3E521460B010042F563 /* LSTImagePreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSTImagePreviewView.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +135,8 @@
 		6B2D453E212417A200AAC0C5 /* SSImagePickerHelper */ = {
 			isa = PBXGroup;
 			children = (
+				6BE5E3E521460B010042F563 /* LSTImagePreviewView.h */,
+				6BE5E3E421460B000042F563 /* LSTImagePreviewView.m */,
 				6B2D453F212417A200AAC0C5 /* SSImagePickerHelper.h */,
 				6B2D4540212417A200AAC0C5 /* SSImagePickerHelper.m */,
 				6B2D4541212417A200AAC0C5 /* UIImage+FixOrientation.h */,
@@ -344,6 +349,7 @@
 				6B62146D2111BFF6003F23E0 /* TestCoderObject.m in Sources */,
 				6BBA4F902101C17C00C481BB /* ViewController.m in Sources */,
 				6B57D5FD2105DFFA005157C4 /* ThemeEditManager.m in Sources */,
+				6BE5E3E621460B010042F563 /* LSTImagePreviewView.m in Sources */,
 				6BBA4F8C2101BD8E00C481BB /* TestNormalViewController.m in Sources */,
 				6B57D5FB2105DFFA005157C4 /* ThemeCreateViewController.m in Sources */,
 				6B57D6022105DFFA005157C4 /* ThemeCreateEditTextView.m in Sources */,

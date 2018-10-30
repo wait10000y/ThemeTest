@@ -436,10 +436,11 @@ __weak typeof(self) weakSelf = self;
 -(void)showDefaultSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -448,12 +449,15 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
+    tempAlert.popoverPresentationController.sourceView = tempCell;
+    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
 -(void)showEnumSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"列表选取",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"列表选取",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"列表选取" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
@@ -463,11 +467,13 @@ __weak typeof(self) weakSelf = self;
                         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
+                textAlert.popoverPresentationController.sourceView = tempCell;
+                textAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [textAlert setTipTitle:editViewTitle];
                 [self presentViewController:textAlert animated:YES completion:nil];
 
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -476,12 +482,15 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
+    tempAlert.popoverPresentationController.sourceView = tempCell;
+    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
 -(void)showFontSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"字体编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"字体内容"];
@@ -492,10 +501,12 @@ __weak typeof(self) weakSelf = self;
                         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
+                fontAlert.popoverPresentationController.sourceView = tempCell;
+                fontAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [fontAlert setTipTitle:editViewTitle];
                 [self presentViewController:fontAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -504,12 +515,15 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
+    tempAlert.popoverPresentationController.sourceView = tempCell;
+    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
 -(void)showColorSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"颜色编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"颜色内容"];
@@ -517,13 +531,15 @@ __weak typeof(self) weakSelf = self;
                 ThemeCreateEditToolAlertController *colorAlert = [ThemeCreateEditToolAlertController createColorAlertWithColor:cColor complete:^(BOOL isOK, NSString *data) {
                     if (isOK) {
                         itemModel.value = data;
-                        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
+                colorAlert.popoverPresentationController.sourceView = tempCell;
+                colorAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [colorAlert setTipTitle:editViewTitle];
                 [self presentViewController:colorAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -532,13 +548,16 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
+    tempAlert.popoverPresentationController.sourceView = tempCell;
+    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
 -(void)showImageSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     // 相册上传,直接输入,取消
     __weak typeof(self) weakSelf = self;
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"相机拍照",@"相册选取",@"修改地址"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"相机拍照",@"相册选取",@"修改地址"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"相机拍照" isEqualToString:title]) {
                 [weakSelf.photoAlbum showImagePickerControllerWithSourceType:UIImagePickerControllerSourceTypeCamera presentingViewController:weakSelf completionHandler:^(UIImage *image, NSDictionary *info) {
@@ -585,7 +604,7 @@ __weak typeof(self) weakSelf = self;
                 }];
 
             }else if ([@"修改地址" isEqualToString:title]){ // 会删除原资源文件.
-                [self showTextEditViewForUnKnowTypeValue:itemModel complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
                     if (isChange) {
                             // 如果目标文件存在,删除原资源;如果目标文件不存在,修改原资源名称.
                         NSString *cText = [itemModel.value description];
@@ -608,10 +627,14 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
+
+    tempAlert.popoverPresentationController.sourceView = tempCell;
+    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
+
 }
 
 // 编辑未知类型的内容,原始值编辑.
--(void)showTextEditViewForUnKnowTypeValue:(ThemeEditItemModel *)itemModel complete:(void(^)(BOOL isChange,id value))completeBlock
+-(void)showTextEditViewForUnKnowTypeValue:(ThemeEditItemModel *)itemModel forView:(UIView *)showView complete:(void(^)(BOOL isChange,id value))completeBlock
 {
     NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
     NSString *cText;
@@ -636,6 +659,8 @@ __weak typeof(self) weakSelf = self;
         }
         completeBlock(isChange,tempValue);
     }];
+    textAlert.popoverPresentationController.sourceView = showView;
+    textAlert.popoverPresentationController.sourceRect = showView.bounds;
     [textAlert setTipTitle:editViewTitle];
     [self presentViewController:textAlert animated:YES completion:nil];
 }

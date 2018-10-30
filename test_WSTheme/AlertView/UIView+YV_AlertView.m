@@ -19,6 +19,12 @@
     }
     UIAlertController *alertC = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleActionSheet];
 
+        // support iPad
+    alertC.popoverPresentationController.sourceView = presentVC.view;
+    CGRect tempRect = presentVC.view.bounds;
+    alertC.popoverPresentationController.sourceRect = CGRectMake(CGRectGetWidth(tempRect)/2, CGRectGetHeight(tempRect)-1, 1, 1);
+
+
     for (int it=0; it<names.count; it++) {
         NSString *tempName = names[it];
         UIAlertAction *action2 = [UIAlertAction actionWithTitle:tempName style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
@@ -50,6 +56,10 @@
         return nil;
     }
     UIAlertController *alertC = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleAlert];
+        // support iPad
+    alertC.popoverPresentationController.sourceView = presentVC.view;
+    CGRect tempRect = presentVC.view.bounds;
+    alertC.popoverPresentationController.sourceRect = CGRectMake(CGRectGetWidth(tempRect)/2, CGRectGetHeight(tempRect)/2, 1, 1);
     switch (type) {
         case 1: // 输入文字框,确定
         {
