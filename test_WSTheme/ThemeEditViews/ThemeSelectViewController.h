@@ -2,8 +2,8 @@
 //  ThemeSelectViewController.h
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/6/27.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/6/27.
+//  wsliang.
 //
 /**
 

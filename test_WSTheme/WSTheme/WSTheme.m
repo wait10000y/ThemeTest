@@ -2,8 +2,8 @@
 //  WSTheme.m
 //  Test_LEETheme
 //
-//  Created by wsliang on 2018/7/13.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/7/13.
+//  wsliang.
 //
 
 #import "WSTheme.h"
@@ -305,6 +305,10 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
     WSThemeModel *currentModel; // theme 数据处理层.
     NSLock *opLock;
 }
+
+@dynamic currentThemeModel;
+@dynamic currentThemeName;
+@dynamic themeNameList;
 
 - (instancetype)init
 {
@@ -737,7 +741,7 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
 {
     unsigned long hex = 0;
     BOOL hasAlpha = NO; // 只有 字符串 强制定义alpha数值.
-    if ([value isKindOfClass:[NSString class]]) {
+    if ([value isKindOfClass:[NSString class]] && value.length>0) {
         value = [[value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] uppercaseString];
         if([value hasPrefix:@"0X"]){
             value = [value substringFromIndex:2];
@@ -767,12 +771,12 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
         NSArray *fonts = [fontSize componentsSeparatedByString:@":"];
         int size = [[fonts lastObject] intValue];
         if (size>0) {
-            return [UIFont fontWithName:[fonts firstObject] size:size];
+            return [UIFont fontWithName:[fonts firstObject] size:size]?:[UIFont systemFontOfSize:size];
         }
     }else{
-        int size = [fontSize intValue];
+        int size = [[fontSize description] intValue];
         if (size>0) {
-            return [UIFont systemFontOfSize:[fontSize intValue]];
+            return [UIFont systemFontOfSize:size];
         }
     }
     return nil;
@@ -887,7 +891,7 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
             tempStr =[NSString stringWithFormat:@"#%.2X%.2X%.2X",R,G,B];
         }
     }
-    return tempStr;
+    return @"";
 }
 
 -(NSString *)parseFont:(UIFont *)theFont
@@ -965,6 +969,15 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
 @end
 
 @implementation WSThemeConfig
+
+@dynamic custom;
+@dynamic original;
+@dynamic text;
+@dynamic color;
+@dynamic font;
+@dynamic image;
+@dynamic data;
+@dynamic attribute;
 
 - (instancetype)init
 {

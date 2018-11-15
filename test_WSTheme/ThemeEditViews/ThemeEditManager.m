@@ -2,8 +2,8 @@
 //  ThemeEditManager.m
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/6/29.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/6/29.
+//  wsliang.
 //
 
 #import "ThemeEditManager.h"
@@ -12,7 +12,7 @@
 
 static NSArray *systemThemeList;
 static NSDictionary *templateJsonDict;
-
+static NSURL *templateJsonDictUrl;
 
 @implementation ThemeEditManager
 {
@@ -26,6 +26,11 @@ static NSDictionary *templateJsonDict;
 +(void)setThemeTemplateDefault:(NSDictionary *)theTemplate
 {
     templateJsonDict = theTemplate;
+}
+
++(void)setThemeTemplateDefaultFileUrl:(NSURL *)theUrl
+{
+    templateJsonDictUrl = theUrl;
 }
 
     // theme主题列表(namelist)
@@ -59,6 +64,10 @@ static NSDictionary *templateJsonDict;
     return NO;
 }
 
++(NSString *)getThemePathWithThemeName:(NSString *)themeName
+{
+    return [WSThemeFile themeMainPath:themeName];
+}
 
 
 
@@ -77,6 +86,7 @@ static NSDictionary *templateJsonDict;
     }
     return self;
 }
+
 
 -(NSString *)createThemeCopyFromTheme:(NSString *)themeName
 {
@@ -122,7 +132,10 @@ static NSDictionary *templateJsonDict;
     }
 
     NSDictionary *templateDict = templateJsonDict;
-
+    if (!templateDict && templateJsonDictUrl) {
+        NSData *defaultData = [NSData dataWithContentsOfURL:templateJsonDictUrl];
+        templateDict = [NSJSONSerialization JSONObjectWithData:defaultData options:0 error:nil];
+    }
     // 解析数据. 按照 二级模板 解析.
 
     // 解析 第一层 title列表.
@@ -259,8 +272,6 @@ static NSDictionary *templateJsonDict;
 }
 
 
-
-
 @end
 
 
@@ -303,9 +314,26 @@ static NSDictionary *templateJsonDict;
     item.order =@(NSIntegerMax);
     item.mType = ThemeEditItemTypeNone;
     item.name = item.keypath = keypath;
-//    if ([value isKindOfClass:[NSNumber class]] || [value isKindOfClass:[NSString class]]) {
-//
-//    }
+
+    /**
+        if (value) {
+            if ([value isKindOfClass:[NSDictionary class]]) {
+                item.mType = ThemeEditItemTypeDict;
+            }else if ([value isKindOfClass:[NSString class]]){
+                item.mType = ThemeEditItemTypeText;
+            }else if ([value isKindOfClass:[NSNumber class]]){
+                item.mType = ThemeEditItemTypeNumber;
+            }else if([value isKindOfClass:[NSNull class]]){
+                item.mType = ThemeEditItemTypeText;
+                item.value = item.defalut = @"";
+            }else{
+                item.mType = ThemeEditItemTypeText;
+            }
+        }
+     
+     */
+
+
     return item;
 }
 +(ThemeEditItemModel*)createWithModelDict:(NSDictionary*)dict withKeypath:(NSString *)keypath
@@ -329,17 +357,11 @@ static NSDictionary *templateJsonDict;
     return item;
 }
 
-+(NSArray *)itemTypeList
-{
-    static NSArray *typeStrArr;
-    if (!typeStrArr) { typeStrArr = ThemeEditItemModelTypeList; }
-    return typeStrArr;
-}
 +(ThemeEditItemType)parseItemType:(NSString *)typeStr
 {
     if (typeStr) {
         // color,text,image,font,num,dict,node 字符显示
-        NSInteger index = [[self itemTypeList] indexOfObject:typeStr];
+        NSInteger index = [ThemeEditItemModelTypeList indexOfObject:typeStr];
         if (index != NSNotFound) {
             return (ThemeEditItemType)index;
         }
@@ -349,11 +371,20 @@ static NSDictionary *templateJsonDict;
 
 +(NSString *)getItemTypeStr:(ThemeEditItemType)type
 {
-        NSArray *typeStrArr = [self itemTypeList];
+    NSArray *typeStrArr = ThemeEditItemModelTypeList;
     if (typeStrArr.count>type) {
         return typeStrArr[type];
     }
-    return nil;
+    return @"none";
+}
+
++(NSString *)getItemTypeDescStr:(ThemeEditItemType)type
+{
+    NSArray *typeStrArr = ThemeEditItemModelTypeDescList;
+    if (typeStrArr.count>type) {
+        return typeStrArr[type];
+    }
+    return @"未知";
 }
 
 -(UIColor *)createColor

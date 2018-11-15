@@ -2,8 +2,8 @@
 //  ThemeCreateViewController.m
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/6/27.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/6/27.
+//  wsliang.
 //
 
 #import "ThemeCreateViewController.h"
@@ -15,9 +15,10 @@
 #import "UIView+YV_AlertView.h"
 #import "SSImagePickerHelper.h"
 
+
 #define isIpad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
-@interface ThemeCreateViewController ()<UINavigationControllerDelegate,UIGestureRecognizerDelegate>
+@interface ThemeCreateViewController ()<UINavigationControllerDelegate,UIGestureRecognizerDelegate,UITableViewDelegate,UITableViewDataSource>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 
@@ -25,9 +26,10 @@
 
 @property (nonatomic) NSArray *titleList; // section标题列表.
 @property (nonatomic) NSArray *subTitleList; // 两级数据. key列表
+@property(nonatomic) NSMutableArray *sectionStatusList; // section 开关状态列表. number 0:1
 
 @property(nonatomic) NSString *themeName; // 新主题名称.
-
+@property(nonatomic) NSDictionary *itemDataTypeDict; // 修改字段类型时,生成的枚举列表内容.
 
 @property(nonatomic) ThemeEditManager *editManager;
 
@@ -42,7 +44,10 @@
 @end
 
 @implementation ThemeCreateViewController
+{
 
+
+}
 -(SSImagePickerHelper *)photoAlbum
 {
     if (!_photoAlbum) {
@@ -151,10 +156,17 @@ __weak typeof(self) weakSelf = self;
 
 }
 
+-(IBAction)actionTableViewSectionEvent:(UIControl *)sender
+{
+    NSNumber *showTag = self.sectionStatusList[sender.tag];
+    [self.sectionStatusList replaceObjectAtIndex:sender.tag withObject:@(!showTag.boolValue)];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:sender.tag] withRowAnimation:UITableViewRowAnimationAutomatic];
+}
+
 -(void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    self.headerView.frame = CGRectMake(0, 0, self.tableView.frame.size.width, 92);
+    self.headerView.frame = CGRectMake(0, 0, self.tableView.frame.size.width, isIpad?140:114);
     self.tableView.tableHeaderView = self.headerView;
 }
 
@@ -162,9 +174,30 @@ __weak typeof(self) weakSelf = self;
 {
     self.tableViewCellId = @"YV_ThemeListViewControllerCell";
     self.headerView = [ThemeCreateHeaderView ceateHeaderView];
-    NSString *tempTitle = ((self.selectedThemeName.length>12)?[self.selectedThemeName substringToIndex:6]:self.selectedThemeName);
-    NSString *title = [NSString stringWithFormat:@"%@%ld",tempTitle?:@"未命名",(long)[[NSDate date] timeIntervalSince1970]];
-    self.headerView.textTitle.text = title;
+
+    if([self.tableView respondsToSelector:@selector(setSeparatorInset:)]){
+        self.tableView.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
+    }
+    if([self.tableView respondsToSelector:@selector(setLayoutMargins:)]){
+        self.tableView.layoutMargins = UIEdgeInsetsZero;
+    }
+
+    NSString *title = @"(复制)";
+    NSRange tempRange = [self.selectedThemeName rangeOfString:title];
+    if (tempRange.location != NSNotFound) {
+        title = [self.selectedThemeName substringToIndex:tempRange.location+tempRange.length];
+    }else{
+        title = [NSString stringWithFormat:@"%@%@",self.selectedThemeName,title];
+    }
+    NSArray *allNames = [ThemeEditManager themeNameList];
+    NSUInteger num = 0;
+    NSString *newTitle = title;
+    while ([allNames containsObject:newTitle] && num < 10001) { // 最多10000个主题.
+        newTitle = [NSString stringWithFormat:@"%@%lu",title,(unsigned long)++num];
+    }
+    self.headerView.textTitle.text = newTitle;
+    self.themeName = newTitle;
+    self.title = newTitle;
     __weak typeof(self) weakSelf = self;
     self.headerView.callBlack = ^(UILabel *textTitle) {
         [weakSelf showCreateThemeNameView];
@@ -199,9 +232,12 @@ __weak typeof(self) weakSelf = self;
     }
 
 
-
     self.titleList = titleList;
     self.subTitleList = subItemList;
+    self.sectionStatusList = [[NSMutableArray alloc] initWithCapacity:titleList.count];
+    for (int it=0; it<titleList.count; it++) {
+        [self.sectionStatusList addObject:@(YES)];
+    }
     [self.tableView reloadData];
 }
 
@@ -272,14 +308,14 @@ __weak typeof(self) weakSelf = self;
                     }];
                 }else{
                     weakSelf.themeName = name;
+                    weakSelf.title = name;
                     weakSelf.headerView.textTitle.text = name;
                 }
             }else{
                 [weakSelf showAlertMessage:@"名称不能为空,或者其他特殊字符!" needConfirm:NO complete:^(BOOL isOK, id data) {
-
-                    NSString *tempTitle = ((self.selectedThemeName.length>12)?[self.selectedThemeName substringToIndex:6]:self.selectedThemeName);
-                    NSString *title = [NSString stringWithFormat:@"%@%ld",tempTitle?:@"未命名",(long)[[NSDate date] timeIntervalSince1970]];
-                    weakSelf.headerView.textTitle.text = title;
+//                    NSString *tempTitle = ((self.selectedThemeName.length>12)?[self.selectedThemeName substringToIndex:6]:self.selectedThemeName);
+//                    NSString *title = [NSString stringWithFormat:@"%@%ld",tempTitle?:@"未命名",(long)[[NSDate date] timeIntervalSince1970]];
+//                    weakSelf.headerView.textTitle.text = title;
                     [weakSelf showCreateThemeNameView];
                 }];
             }
@@ -298,30 +334,38 @@ __weak typeof(self) weakSelf = self;
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSArray *tempArr = self.subTitleList[section];
-    return tempArr.count;
+    NSNumber *showTag = self.sectionStatusList[section];
+    if (showTag.boolValue) {
+        NSArray *tempArr = self.subTitleList[section];
+        return tempArr.count;
+    }
+    return 0;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return isIpad?76:54;
+    return isIpad?72:56;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
     NSArray *tempArr = self.subTitleList[section];
     if (tempArr.count>0) {
-        return (isIpad?54:44);
+        return (isIpad?44:38);
     }
     return 0;
 }
 
--(UIView *)createTableViewSectionView:(NSString *)theTitle
+-(UIView *)createTableViewSectionView:(NSString *)theTitle withSection:(NSInteger)section
 {
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 38)];
+    UIControl *headerView = [[UIControl alloc] initWithFrame:CGRectMake(0, 0, 320, isIpad?44:38)];
+    [headerView addTarget:self action:@selector(actionTableViewSectionEvent:) forControlEvents:UIControlEventTouchUpInside];
+    headerView.tag = section;
+
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, 290, 38)];
-    tempLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(isIpad?25:15, 0, 290, isIpad?44:38)];
+    tempLabel.font = [UIFont systemFontOfSize:isIpad?20:16];
+    tempLabel.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [headerView addSubview:tempLabel];
 //        tempLabel.userInteractionEnabled = YES;
     tempLabel.adjustsFontSizeToFitWidth = YES;
@@ -336,7 +380,7 @@ __weak typeof(self) weakSelf = self;
     NSArray *tempArr = self.subTitleList[section];
     if (tempArr.count>0) {
         ThemeEditItemModel *theTitle = self.titleList[section];
-        return [self createTableViewSectionView:theTitle.name];
+        return [self createTableViewSectionView:theTitle.name withSection:section];
     }
     return nil;
 }
@@ -350,10 +394,21 @@ __weak typeof(self) weakSelf = self;
             //        cell.detailTextLabel.textColor = [[YV_DataUtil sharedObject] getDefaultTheme].tableCellSubTitleColor;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.detailTextLabel.minimumScaleFactor = 0.25f;
-        cell.detailTextLabel.numberOfLines = 0;
+        cell.detailTextLabel.numberOfLines = 2;
+        cell.textLabel.minimumScaleFactor = 0.25f;
+        cell.textLabel.numberOfLines = 2;
         if (isIpad) {
-            cell.textLabel.font = [UIFont systemFontOfSize:18];
-            cell.detailTextLabel.font = [UIFont systemFontOfSize:15];
+            cell.textLabel.font = [UIFont systemFontOfSize:21];
+            cell.detailTextLabel.font = [UIFont systemFontOfSize:17];
+        }else{
+            cell.textLabel.font = [UIFont systemFontOfSize:16];
+            cell.detailTextLabel.font = [UIFont systemFontOfSize:14];
+        }
+        cell.textLabel.adjustsFontSizeToFitWidth=YES;
+        cell.detailTextLabel.adjustsFontSizeToFitWidth=YES;
+        cell.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
+        if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+            cell.layoutMargins = UIEdgeInsetsZero;
         }
     }
 
@@ -363,6 +418,10 @@ __weak typeof(self) weakSelf = self;
     UIImage *imageIcon; //TODO: 图标选取.
     NSString *detailText;
     switch (itemModel.mType) {
+        case ThemeEditItemTypeNone:
+        {
+            detailText = @"未定义类型";
+        } break;
         case ThemeEditItemTypeImage:
         {
             detailText = @"图片资源";
@@ -381,7 +440,7 @@ __weak typeof(self) weakSelf = self;
         } break;
         default:
         {
-            detailText = [itemModel.value description]?:@"没有内容";
+            detailText = itemModel.value?[itemModel.value description]:@"没有内容";
         } break;
     }
 
@@ -390,6 +449,64 @@ __weak typeof(self) weakSelf = self;
     cell.imageView.image = imageIcon;
 
     return cell;
+}
+
+-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return UITableViewCellEditingStyleDelete;
+}
+- (nullable NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return @"修改编辑类型";
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        NSMutableArray *itemModelArr = self.subTitleList[indexPath.section];
+        ThemeEditItemModel *itemModel = itemModelArr[indexPath.row];
+        [self showTypeChangeViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, NSNumber *value) {
+            if (isChange) {
+                itemModel.mType = value.intValue;
+                [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            }
+        }];
+    }
+}
+
+- (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    __weak typeof(self) weakSelf = self;
+    UITableViewRowAction *actionReview = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"查看原值" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
+        NSMutableArray *itemModelArr = weakSelf.subTitleList[indexPath3.section];
+        ThemeEditItemModel *itemModel = itemModelArr[indexPath3.row];
+
+        NSString *cText;
+        if ([itemModel.value isKindOfClass:[NSNull class]]) {
+            cText = itemModel.value = @"";
+        }else if ([itemModel.value isKindOfClass:[NSArray class]] || [itemModel.value isKindOfClass:[NSDictionary class]]) {
+            cText = [itemModel createJsonText];
+        }else{
+            cText = [itemModel.value description];
+        }
+        [weakSelf showAlertMessage:cText needConfirm:NO complete:nil];
+    }];
+
+    UITableViewRowAction *actionChangeType = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"修改编辑类型" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
+        NSMutableArray *itemModelArr = weakSelf.subTitleList[indexPath3.section];
+        ThemeEditItemModel *itemModel = itemModelArr[indexPath3.row];
+        [weakSelf showTypeChangeViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, NSNumber *value) {
+            if (isChange) {
+                itemModel.mType = value.intValue;
+                [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath3] withRowAnimation:UITableViewRowAnimationAutomatic];
+            }
+        }];
+    }];
+    return @[actionReview,actionChangeType];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -404,7 +521,7 @@ __weak typeof(self) weakSelf = self;
 
     // 判断枚举类型
     if(itemModel.enums.count>0){ // enums 格式要正确.
-        [self showEnumSelectViewForItem:itemModel withIndexPath:indexPath];
+        [self showEnumEditSelectViewForItem:itemModel withIndexPath:indexPath];
         return;
     }
 
@@ -413,34 +530,42 @@ __weak typeof(self) weakSelf = self;
      value: nsstring,nsnumber,nsdictionary
      */
     switch (itemModel.mType) {
+        case ThemeEditItemTypeNone:
+        {
+            [self showTypeChangeSelectViewForItem:itemModel withIndexPath:indexPath];
+        } break;
         case ThemeEditItemTypeImage:
         {
-            [self showImageSelectViewForItem:itemModel withIndexPath:indexPath];
+            [self showImageEditSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
         case ThemeEditItemTypeColor: // color
         {
-            [self showColorSelectViewForItem:itemModel withIndexPath:indexPath];
+            [self showColorEditSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
         case ThemeEditItemTypeFont: // font
         {
-            [self showFontSelectViewForItem:itemModel withIndexPath:indexPath];
+            [self showFontEditSelectViewForItem:itemModel withIndexPath:indexPath];
+        } break;
+        case ThemeEditItemTypeDict: // dict
+        {
+            [self showDefaultEditSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
         default:
         {
-            [self showDefaultSelectViewForItem:itemModel withIndexPath:indexPath];
+            [self showDefaultEditSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
     }
 
 }
 
--(void)showDefaultSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+-(void)showDefaultEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -449,15 +574,40 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
-    tempAlert.popoverPresentationController.sourceView = tempCell;
-    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
-
--(void)showEnumSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+// 修改属性的 编辑类型(本次编辑中有效)
+-(void)showTypeChangeSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"列表选取",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"修改编辑类型",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+        if(isOK){
+            if ([@"修改编辑类型" isEqualToString:title]){
+                [weakSelf showTypeChangeViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, NSNumber *value) {
+                    if (isChange) {
+                        itemModel.mType = value.intValue;
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+                }];
+            }else{
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
+                    if (isChange) {
+                        itemModel.value = value;
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+                }];
+            }
+        }
+    }];
+
+
+}
+
+-(void)showEnumEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+{
+    __weak typeof(self) weakSelf = self;
+    UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"列表选取",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"列表选取" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
@@ -467,13 +617,11 @@ __weak typeof(self) weakSelf = self;
                         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
-                textAlert.popoverPresentationController.sourceView = tempCell;
-                textAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [textAlert setTipTitle:editViewTitle];
                 [self presentViewController:textAlert animated:YES completion:nil];
 
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -482,15 +630,13 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
-    tempAlert.popoverPresentationController.sourceView = tempCell;
-    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
--(void)showFontSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+-(void)showFontEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"字体编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"字体内容"];
@@ -501,12 +647,10 @@ __weak typeof(self) weakSelf = self;
                         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
-                fontAlert.popoverPresentationController.sourceView = tempCell;
-                fontAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [fontAlert setTipTitle:editViewTitle];
                 [self presentViewController:fontAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"字号或(字体名:字号)格式:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -515,15 +659,13 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
-    tempAlert.popoverPresentationController.sourceView = tempCell;
-    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
--(void)showColorSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+-(void)showColorEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"颜色编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"颜色内容"];
@@ -531,15 +673,13 @@ __weak typeof(self) weakSelf = self;
                 ThemeCreateEditToolAlertController *colorAlert = [ThemeCreateEditToolAlertController createColorAlertWithColor:cColor complete:^(BOOL isOK, NSString *data) {
                     if (isOK) {
                         itemModel.value = data;
-                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                     }
                 }];
-                colorAlert.popoverPresentationController.sourceView = tempCell;
-                colorAlert.popoverPresentationController.sourceRect = tempCell.bounds;
                 [colorAlert setTipTitle:editViewTitle];
                 [self presentViewController:colorAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"#ARGB十六进制格式或数字:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -548,16 +688,14 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
-    tempAlert.popoverPresentationController.sourceView = tempCell;
-    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
 }
 
--(void)showImageSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+-(void)showImageEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     // 相册上传,直接输入,取消
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    UIAlertController *tempAlert = [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"相机拍照",@"相册选取",@"修改地址"] forViewController:self completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"相机拍照",@"相册选取",@"修改地址"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"相机拍照" isEqualToString:title]) {
                 [weakSelf.photoAlbum showImagePickerControllerWithSourceType:UIImagePickerControllerSourceTypeCamera presentingViewController:weakSelf completionHandler:^(UIImage *image, NSDictionary *info) {
@@ -604,7 +742,7 @@ __weak typeof(self) weakSelf = self;
                 }];
 
             }else if ([@"修改地址" isEqualToString:title]){ // 会删除原资源文件.
-                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel forView:tempCell complete:^(BOOL isChange, id value) {
+                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"图片名称或主题资源名称:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                             // 如果目标文件存在,删除原资源;如果目标文件不存在,修改原资源名称.
                         NSString *cText = [itemModel.value description];
@@ -627,16 +765,12 @@ __weak typeof(self) weakSelf = self;
             }
         }
     }];
-
-    tempAlert.popoverPresentationController.sourceView = tempCell;
-    tempAlert.popoverPresentationController.sourceRect = tempCell.bounds;
-
 }
 
 // 编辑未知类型的内容,原始值编辑.
--(void)showTextEditViewForUnKnowTypeValue:(ThemeEditItemModel *)itemModel forView:(UIView *)showView complete:(void(^)(BOOL isChange,id value))completeBlock
+-(void)showTextEditViewForUnKnowTypeValue:(ThemeEditItemModel *)itemModel withTitle:(NSString *)showTitle complete:(void(^)(BOOL isChange,id value))completeBlock
 {
-    NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
+    NSString *editViewTitle = showTitle?:[NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"内容"];
     NSString *cText;
     BOOL isJsonValue = NO;
     if ([itemModel.value isKindOfClass:[NSNull class]]) {
@@ -657,14 +791,43 @@ __weak typeof(self) weakSelf = self;
                     //                itemModel.value = tempValue;
             }
         }
-        completeBlock(isChange,tempValue);
+
+        if (completeBlock) {
+            completeBlock(isChange,tempValue);
+        }
     }];
-    textAlert.popoverPresentationController.sourceView = showView;
-    textAlert.popoverPresentationController.sourceRect = showView.bounds;
     [textAlert setTipTitle:editViewTitle];
     [self presentViewController:textAlert animated:YES completion:nil];
 }
 
+-(void)showTypeChangeViewForUnKnowTypeValue:(ThemeEditItemModel *)itemModel withTitle:(NSString *)showTitle complete:(void(^)(BOOL isChange,id value))completeBlock
+{
+    __weak typeof(self) weakSelf = self;
+    NSString *editViewTitle = showTitle?:[NSString stringWithFormat:@"修改数据编辑类型:"];
+    if (!self.itemDataTypeDict) {
+        NSArray *typeDescList = ThemeEditItemModelTypeDescList;
+        NSMutableDictionary *tempDict = [[NSMutableDictionary alloc] initWithCapacity:typeDescList.count];
+        for (int it=0; it<typeDescList.count; it++) {
+            [tempDict setObject:@(it) forKey:typeDescList[it]];
+        }
+        self.itemDataTypeDict = [NSDictionary dictionaryWithDictionary:tempDict];
+    }
+    NSNumber *tempType = @(itemModel.mType);
+    ThemeCreateEditToolAlertController *textAlert = [ThemeCreateEditToolAlertController createEnumAlertWithDataDict:self.itemDataTypeDict defaultValue:tempType complete:^(BOOL isOK, NSNumber *data) {
+        BOOL isChange = NO;
+        id tempValue = data;
+        if (isOK) {
+            if (![data isEqual:tempType]) { // 如果内容已修改
+                isChange = YES;
+            }
+        }
+        if (completeBlock) {
+            completeBlock(isChange,tempValue);
+        }
+    }];
+    [textAlert setTipTitle:editViewTitle];
+    [weakSelf presentViewController:textAlert animated:YES completion:nil];
+}
 
 // utils
 //提醒框封装方法

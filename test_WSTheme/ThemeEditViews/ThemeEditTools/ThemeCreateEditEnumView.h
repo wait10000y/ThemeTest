@@ -2,8 +2,8 @@
 //  ThemeCreateEditEnumView.h
 //  test_WSTheme
 //
-//  Created by wsliang on 2018/7/27.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/7/27.
+//  wsliang.
 //
 
 #import <UIKit/UIKit.h>

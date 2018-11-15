@@ -2,8 +2,8 @@
 //  UIImage+YV_ColorImage.h
 //  yivian
 //
-//  Created by wsliang on 2018/4/25.
-//  Copyright © 2018年 yivian. All rights reserved.
+//  Created on 2018/4/25.
+//  yivian.
 //
 
 #import <UIKit/UIKit.h>

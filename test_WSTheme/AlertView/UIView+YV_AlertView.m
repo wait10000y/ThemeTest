@@ -2,8 +2,8 @@
 //  UIView+YV_AlertView.m
 //  yivian
 //
-//  Created by 王士良 on 2018/3/28.
-//  Copyright © 2018年 yivian. All rights reserved.
+//  Created on 2018/3/28.
+//  yivian.
 //
 
 #import "UIView+YV_AlertView.h"
@@ -12,7 +12,7 @@
 
 @implementation UIView (YV_AlertView)
 
-+(UIAlertController *)showActionSheetWithTitle:(NSString *)title withText:(NSString*)text withActionNames:(NSArray<NSString *> *)names forViewController:(UIViewController *)presentVC completionHandler:(void(^)(BOOL isOK,NSString *title))completionHandler
++(UIAlertController *)showActionSheetWithTitle:(NSString *)title withText:(NSString*)text withActionNames:(NSArray<NSString *> *)names forViewController:(UIViewController *)presentVC forView:(UIView *)showView completionHandler:(void(^)(BOOL isOK,NSString *title))completionHandler
 {
     if (!presentVC) {
         return nil;
@@ -20,9 +20,16 @@
     UIAlertController *alertC = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleActionSheet];
 
         // support iPad
-    alertC.popoverPresentationController.sourceView = presentVC.view;
-    CGRect tempRect = presentVC.view.bounds;
-    alertC.popoverPresentationController.sourceRect = CGRectMake(CGRectGetWidth(tempRect)/2, CGRectGetHeight(tempRect)-1, 1, 1);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        CGRect showRect = showView.bounds;
+        if (!showView) {
+            showView = presentVC.view;
+            CGRect tempRect = presentVC.view.bounds;
+            showRect = CGRectMake(CGRectGetWidth(tempRect), 2, 1, 1);
+        }
+        alertC.popoverPresentationController.sourceView = showView;
+        alertC.popoverPresentationController.sourceRect = showRect;
+    }
 
 
     for (int it=0; it<names.count; it++) {
@@ -57,9 +64,11 @@
     }
     UIAlertController *alertC = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleAlert];
         // support iPad
-    alertC.popoverPresentationController.sourceView = presentVC.view;
-    CGRect tempRect = presentVC.view.bounds;
-    alertC.popoverPresentationController.sourceRect = CGRectMake(CGRectGetWidth(tempRect)/2, CGRectGetHeight(tempRect)/2, 1, 1);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        alertC.popoverPresentationController.sourceView = presentVC.view;
+        CGRect tempRect = presentVC.view.bounds;
+        alertC.popoverPresentationController.sourceRect = CGRectMake(CGRectGetWidth(tempRect), 2, 1, 1);
+    }
     switch (type) {
         case 1: // 输入文字框,确定
         {
@@ -190,7 +199,6 @@
         activeView.center = self.center;
         [self addSubview:activeView];
     }
-        //    NSLog(@"==== actiview:%@ ======",activeView);
     activeView.hidden = !isShow;
     if (isShow) {
         [activeView startAnimating];
@@ -199,5 +207,35 @@
     }
 }
 
+-(void)showModelLoadingTipsView:(BOOL)isShow
+{
+    static UIActivityIndicatorView *activeView;
+    if (!activeView) {
+        activeView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:isIpad?UIActivityIndicatorViewStyleWhiteLarge:UIActivityIndicatorViewStyleWhite];
+        activeView.alpha = 0;
+        activeView.hidesWhenStopped = YES;
+        activeView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        activeView.userInteractionEnabled = YES;
+    }
+    if (isShow) {
+//        UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
+        UIView *window = self;
+        activeView.frame = window.bounds;
+        activeView.center = window.center;
+        [window addSubview:activeView];
+        activeView.color = [UIColor whiteColor];
+        activeView.backgroundColor = [UIColor colorWithWhite:0.2f alpha:0.4f];
+
+        [activeView startAnimating];
+        [UIView animateWithDuration:0.15f animations:^{
+            activeView.alpha = 1;
+        }];
+    }else{
+        [UIView animateWithDuration:0.15f animations:^{
+            activeView.alpha = 0;
+            [activeView stopAnimating];
+        }];
+    }
+}
 
 @end

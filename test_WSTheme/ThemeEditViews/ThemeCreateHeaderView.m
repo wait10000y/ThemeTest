@@ -2,8 +2,8 @@
 //  ThemeCreateHeaderView.m
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/7/2.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/7/2.
+//  wsliang.
 //
 
 #import "ThemeCreateHeaderView.h"
@@ -13,6 +13,10 @@
 +(ThemeCreateHeaderView *)ceateHeaderView
 {
     ThemeCreateHeaderView *headerView = [[[NSBundle mainBundle] loadNibNamed:@"ThemeCreateHeaderView" owner:nil options:nil] firstObject];
+    headerView.textTitle.superview.layer.borderWidth = 1.0f/[UIScreen mainScreen].scale;
+    headerView.textTitle.superview.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    headerView.textTitle.minimumScaleFactor = 0.25f;
+    headerView.textTitle.numberOfLines = 2;
     return headerView;
 
 //    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 38)];

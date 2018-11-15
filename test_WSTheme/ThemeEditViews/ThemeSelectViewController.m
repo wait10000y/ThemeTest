@@ -2,8 +2,8 @@
 //  ThemeSelectViewController.m
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/6/27.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/6/27.
+//  wsliang.
 //
 
 #import "ThemeSelectViewController.h"
@@ -46,10 +46,10 @@
 -(void)addNavEditTools
 {
     if (self.navigationItem) {
-        UIBarButtonItem *editItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:UIBarButtonItemStylePlain target:self action:@selector(barItemAction:)];
+        UIBarButtonItem *editItem = [[UIBarButtonItem alloc] initWithTitle:@"添加主题" style:UIBarButtonItemStylePlain target:self action:@selector(barItemAction:)];
+        editItem.tag = 1;
 //        UIBarButtonItem *editItem2 = [[UIBarButtonItem alloc] initWithTitle:@"删除" style:UIBarButtonItemStylePlain target:self action:@selector(barItemAction:)];
 //        editItem2.tag = 2;
-        editItem.tag = 1;
 //        self.navigationItem.rightBarButtonItems = @[editItem,editItem2];
         self.navigationItem.rightBarButtonItem = editItem;
 
@@ -62,13 +62,24 @@
 
 -(void)barItemAction:(UIBarButtonItem *)sender
 {
-    if(sender.tag == 1){
-        NSString *themeName = _currentName?:[ThemeEditManager currentThemeName];
-        [self openCreateViewController:themeName];
-    }else if (sender.tag==3){
-        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    if(sender.tag == 1){ // 添加新主题
+        NSString *defaultThemeName = [[self.dataList firstObject] firstObject];
+        NSString *themeName = defaultThemeName?:[ThemeEditManager currentThemeName];
+        NSString *tips = [NSString stringWithFormat:@"以 %@ 为模板,创建新主题?",themeName];
+        [self showAlertMessage:tips needConfirm:YES complete:^(BOOL isOK, id data) {
+            if (isOK) {
+                [self openCreateViewController:themeName];
+            }
+        }];
+    }else if (sender.tag==3){ // 关闭当前界面
+        if (self.navigationController.viewControllers.count>1){
+            [self.navigationController popViewControllerAnimated:YES];
+        }else{ // presentingViewController
+            [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+        }
+
         
-    }else{
+    }else if(sender.tag == 2){ // 删除功能..
         BOOL isEdit = [@"完成" isEqualToString:sender.title];
         [self.tableView setEditing:!isEdit animated:YES];
         if(isEdit){
@@ -97,6 +108,12 @@
 -(void)setTableViewData
 {
     self.tableViewCellId = @"YV_ThemeListViewControllerCell";
+    if([self.tableView respondsToSelector:@selector(setSeparatorInset:)]){
+        self.tableView.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
+    }
+    if([self.tableView respondsToSelector:@selector(setLayoutMargins:)]){
+        self.tableView.layoutMargins = UIEdgeInsetsZero;
+    }
 }
 
 -(void)loadThemeList
@@ -134,7 +151,7 @@
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return isIpad?76:54;
+    return isIpad?72:56;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
@@ -148,10 +165,10 @@
 
 -(UIView *)createTableViewSectionView:(NSString *)theTitle
 {
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 38)];
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, isIpad?44:38)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, 290, 38)];
-    tempLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(isIpad?25:15, 0, 290, isIpad?44:38)];
+    tempLabel.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [headerView addSubview:tempLabel];
 //        tempLabel.userInteractionEnabled = YES;
     tempLabel.textColor = [UIColor grayColor];
@@ -186,12 +203,22 @@
 //        cell.detailTextLabel.textColor = [[YV_DataUtil sharedObject] getDefaultTheme].tableCellSubTitleColor;
 //        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.detailTextLabel.minimumScaleFactor = 0.25f;
-        cell.detailTextLabel.numberOfLines = 0;
+        cell.detailTextLabel.numberOfLines = 2;
+        cell.textLabel.minimumScaleFactor = 0.25f;
+        cell.textLabel.numberOfLines = 2;
         if (isIpad) {
             cell.textLabel.font = [UIFont systemFontOfSize:18];
             cell.detailTextLabel.font = [UIFont systemFontOfSize:15];
         }
+        
+        cell.textLabel.adjustsFontSizeToFitWidth=YES;
+        cell.detailTextLabel.adjustsFontSizeToFitWidth=YES;
+        cell.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
+        if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+            cell.layoutMargins = UIEdgeInsetsZero;
+        }
     }
+
     NSArray *tempArr = self.dataList[indexPath.section];
     NSString *item = tempArr[indexPath.row];
     cell.textLabel.text = item;
@@ -228,20 +255,18 @@
 
 -(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-        // 默认主题不可以删除.
-    return (indexPath.section>0);
+//        // 默认主题不可以删除.
+//    return (indexPath.section>0);
+    return YES;
 }
 
 - (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-        // 判断是否可以 执行删除操作
-    if(tableView.editing){ return nil; }
-
     __weak typeof(self) weakSelf = self;
-    UITableViewRowAction *actionReview = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"复制" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
-        NSMutableArray *tempArr = self.dataList[indexPath3.section];
+    UITableViewRowAction *actionReview = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"复制主题" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
+        NSMutableArray *tempArr = weakSelf.dataList[indexPath3.section];
         NSString *themeName = tempArr[indexPath.row];
-        [weakSelf showAlertMessage:@"是否以该主题为模板创建新主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
+        [weakSelf showAlertMessage:@"以该主题为模板创建新主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
             if (isOK) {
                 [weakSelf openCreateViewController:themeName];
             }
@@ -249,37 +274,52 @@
     }];
 
 
-    UITableViewRowAction *actionDel = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除" handler:^(UITableViewRowAction * action1, NSIndexPath * indexPath1) {
-        [weakSelf showAlertMessage:@"确认删除该主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
-            if (isOK) {
-                NSMutableArray *tempArr = weakSelf.dataList[indexPath1.section];
-                NSString *item = tempArr[indexPath.row];
-
-                NSString *result = @"未知错误,请刷新后重试!";
-                if ([[ThemeEditManager currentThemeName] isEqualToString:item]) {
-                    result = @"正在使用中,无法删除!";
-                }else if ([ThemeEditManager removeThemeWithName:item]) {
-//                    result = @"删除成功!";
-                    result = nil;
-                    [tempArr removeObjectAtIndex:indexPath.row];
-                }else{
-                    result = @"删除失败!";
+    if (indexPath.section >0) { // 自定义主题,可以删除.
+        UITableViewRowAction *actionUpload = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"*公测推荐*" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
+            NSMutableArray *tempArr = weakSelf.dataList[indexPath3.section];
+            NSString *themeName = tempArr[indexPath.row];
+            [weakSelf showAlertMessage:@"是否打包该主题,邮件推荐给管理?" needConfirm:YES complete:^(BOOL isOK, id data) {
+                if (isOK) {
+//                    [weakSelf openMailToManagerForTheme:themeName];
                 }
-                if (result) {
-                    [weakSelf showAlertMessage:result needConfirm:NO complete:^(BOOL isOK, id data) {
-                            // 重新读取
-                        [weakSelf loadThemeList];
-                    }];
-                }else{
-                    [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath1] withRowAnimation:UITableViewRowAnimationAutomatic];
-                }
-
-            }
+            }];
         }];
 
-    }];
+        UITableViewRowAction *actionDel = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除主题" handler:^(UITableViewRowAction * action1, NSIndexPath * indexPath1) {
+            [weakSelf showAlertMessage:@"确认删除该主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
+                if (isOK) {
+                    NSMutableArray *tempArr = weakSelf.dataList[indexPath1.section];
+                    NSString *item = tempArr[indexPath.row];
 
-    return @[actionDel,actionReview];
+                    NSString *result = @"未知错误,请刷新后重试!";
+                    if ([[ThemeEditManager currentThemeName] isEqualToString:item]) {
+                        result = @"正在使用中,无法删除!";
+                    }else if ([ThemeEditManager removeThemeWithName:item]) {
+                            //                    result = @"删除成功!";
+                        result = nil;
+                        [tempArr removeObjectAtIndex:indexPath.row];
+                    }else{
+                        result = @"删除失败!";
+                    }
+                    if (result) {
+                        [weakSelf showAlertMessage:result needConfirm:NO complete:^(BOOL isOK, id data) {
+                                // 重新读取
+                            [weakSelf loadThemeList];
+                        }];
+                    }else{
+                        [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath1] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+
+                }
+            }];
+
+        }];
+
+        return @[actionDel,actionReview,actionUpload];
+    }
+
+    return @[actionReview];
+
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -313,13 +353,21 @@
         }
     }];
 }
+
 -(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return UITableViewCellEditingStyleDelete; // UITableViewCellEditingStyleNone
+    if(indexPath.section >0){
+        return UITableViewCellEditingStyleDelete; // UITableViewCellEditingStyleNone
+    }
+    return UITableViewCellEditingStyleNone;
 }
+
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return @"删 除";
+    if(indexPath.section >0){
+        return @"删除主题";
+    }
+    return nil;
 }
 
     //提醒框封装方法
@@ -332,5 +380,9 @@
 {
     return [UIView showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
 }
+
+
+
+
 
 @end

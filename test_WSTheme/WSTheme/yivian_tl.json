@@ -22,7 +22,6 @@
     "tabBar.bar4tintColor":{"name":"设置bar选中颜色","desc":"bar4tintColor","type":"color","order":8,"default":"#37474F"},
 
 
-
     "categoryView":{"name":"资讯列表界面","desc":"categoryView","type":"node","order":3},
     "categoryView.backgroundColor":{"name":"背景颜色","desc":"backgroundColor","type":"color","order":1,"default":"#37474F"},
     "categoryView.navbarBarTinColor":{"name":"导航背景颜色","desc":"navbarBarTinColor","type":"color","order":2,"default":"#37474F"},

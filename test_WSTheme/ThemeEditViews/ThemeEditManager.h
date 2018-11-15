@@ -2,8 +2,8 @@
 //  ThemeEditManager.h
 //  TestTheme_sakura
 //
-//  Created by wsliang on 2018/6/29.
-//  Copyright © 2018年 wsliang. All rights reserved.
+//  Created on 2018/6/29.
+//  wsliang.
 //
 
 #import <Foundation/Foundation.h>
@@ -14,6 +14,7 @@
 
 +(void)setFixedThemeNames:(NSArray<NSString *> *)themeNameList; // 设置不可修改删除的主题列表.
 +(void)setThemeTemplateDefault:(NSDictionary *)theTemplate; //设置默认的主题编辑模板.
++(void)setThemeTemplateDefaultFileUrl:(NSURL *)theUrl;
 
 // --- 主题管理部分 ---
 +(NSArray *)themeNameListFixed; // theme主题列表(设置的不可编辑的主题列表)
@@ -23,6 +24,7 @@
 +(BOOL)startThemeWithName:(NSString *)themeName; // 切换到指定的主题
 +(BOOL)removeThemeWithName:(NSString *)themeName; // 删除一个主题
 
++(NSString *)getThemePathWithThemeName:(NSString *)themeName; // 获取 指定主题的目录地址.
 
 // --- 主题编辑部分 ---
 -(NSString *)createThemeCopyFromTheme:(NSString *)themeName; // 返回新路径.
@@ -89,7 +91,7 @@ typedef enum : NSUInteger {
 
 // 和上面枚举定义一一对应.注意顺序.
 #define ThemeEditItemModelTypeList  (@[@"none", @"node", @"color", @"text", @"font", @"image",@"data", @"num", @"dict"])
-
+#define ThemeEditItemModelTypeDescList  (@[@"未定义", @"节点", @"颜色", @"文字", @"字体", @"图片",@"数据", @"数字", @"字典"])
 
 @interface ThemeEditItemModel : NSObject
 
@@ -117,7 +119,7 @@ typedef enum : NSUInteger {
 
 +(ThemeEditItemType)parseItemType:(NSString *)typeStr;
 +(NSString *)getItemTypeStr:(ThemeEditItemType)type;
-
++(NSString *)getItemTypeDescStr:(ThemeEditItemType)type;
 
 // utils
 -(UIColor *)createColor;
