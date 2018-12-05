@@ -1,10 +1,6 @@
 //
 //  ThemeCreateEditViewProtol.h
-//  TestTheme_sakura
-//
 //  Created on 2018/7/5.
-//  wsliang.
-//
 
 #import <UIKit/UIKit.h>
 

@@ -1,10 +1,6 @@
 //
 //  ThemeCreateViewController.h
-//  TestTheme_sakura
-//
 //  Created on 2018/6/27.
-//  wsliang.
-//
 
 #import <UIKit/UIKit.h>
 

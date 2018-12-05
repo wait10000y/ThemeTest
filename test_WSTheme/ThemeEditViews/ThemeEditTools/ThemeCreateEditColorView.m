@@ -1,10 +1,6 @@
 //
 //  ThemeCreateEditColorView.m
-//  TestTheme_sakura
-//
 //  Created on 2018/7/2.
-//  wsliang.
-//
 
 #import "ThemeCreateEditColorView.h"
 

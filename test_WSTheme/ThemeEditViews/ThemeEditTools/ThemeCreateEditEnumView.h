@@ -1,10 +1,8 @@
 //
 //  ThemeCreateEditEnumView.h
 //  test_WSTheme
-//
+
 //  Created on 2018/7/27.
-//  wsliang.
-//
 
 #import <UIKit/UIKit.h>
 #import "ThemeCreateEditViewProtocol.h"

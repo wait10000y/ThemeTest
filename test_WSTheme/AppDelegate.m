@@ -24,8 +24,8 @@
 
 
 
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"/test2.plist"];
+//    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+//    path = [path stringByAppendingPathComponent:@"/test2.plist"];
 
 
 

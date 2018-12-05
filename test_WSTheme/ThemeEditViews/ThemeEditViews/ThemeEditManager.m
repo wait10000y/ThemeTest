@@ -1,10 +1,6 @@
 //
 //  ThemeEditManager.m
-//  TestTheme_sakura
-//
 //  Created on 2018/6/29.
-//  wsliang.
-//
 
 #import "ThemeEditManager.h"
 

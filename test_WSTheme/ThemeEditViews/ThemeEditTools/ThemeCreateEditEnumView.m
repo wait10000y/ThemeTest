@@ -1,10 +1,8 @@
 //
 //  ThemeCreateEditEnumView.m
 //  test_WSTheme
-//
+
 //  Created on 2018/7/27.
-//  wsliang.
-//
 
 #import "ThemeCreateEditEnumView.h"
 

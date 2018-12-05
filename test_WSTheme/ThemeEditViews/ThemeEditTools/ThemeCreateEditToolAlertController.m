@@ -1,10 +1,6 @@
 //
 //  ThemeCreateEditToolAlertController.m
-//  TestTheme_sakura
-//
 //  Created on 2018/7/2.
-//  wsliang.
-//
 
 #import "ThemeCreateEditToolAlertController.h"
 #import "ThemeCreateEditColorView.h"

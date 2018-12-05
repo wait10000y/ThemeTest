@@ -1,10 +1,6 @@
 //
 //  ThemeEditManager.h
-//  TestTheme_sakura
-//
 //  Created on 2018/6/29.
-//  wsliang.
-//
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>

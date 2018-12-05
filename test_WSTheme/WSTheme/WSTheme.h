@@ -1,10 +1,8 @@
 //
 //  WSTheme.h
 //  Test_LEETheme
-//
+
 //  Created on 2018/7/13.
-//  wsliang.
-//
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>

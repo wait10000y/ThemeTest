@@ -1,10 +1,6 @@
 //
 //  ThemeCreateEditTextView.h
-//  TestTheme_sakura
-//
 //  Created on 2018/7/4.
-//  wsliang.
-//
 
 #import <UIKit/UIKit.h>
 #import "ThemeCreateEditViewProtocol.h"

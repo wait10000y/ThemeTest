@@ -1,10 +1,8 @@
 //
 //  WSTheme.m
 //  Test_LEETheme
-//
+
 //  Created on 2018/7/13.
-//  wsliang.
-//
 
 #import "WSTheme.h"
 

@@ -1,10 +1,6 @@
 //
 //  ThemeSelectViewController.m
-//  TestTheme_sakura
-//
 //  Created on 2018/6/27.
-//  wsliang.
-//
 
 #import "ThemeSelectViewController.h"
 
@@ -17,7 +13,7 @@
 
 @interface ThemeSelectViewController ()<UITableViewDelegate,UITableViewDataSource>
 
-@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic) IBOutlet UITableView *tableView;
 
 @property (nonatomic) NSString *tableViewCellId;
 @property (nonatomic) NSArray *dataList; // 两级array,系统theme列表,自定义列表;
@@ -30,8 +26,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     self.title = @"选择主题";
-
     self.dataList = @[[NSMutableArray new],[NSMutableArray new]];
     self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
 
@@ -80,7 +76,7 @@
         
     }else if(sender.tag == 2){ // 删除功能..
         BOOL isEdit = [@"完成" isEqualToString:sender.title];
-        [self.tableView setEditing:!isEdit animated:YES];
+        [_tableView setEditing:!isEdit animated:YES];
         if(isEdit){
             sender.title = @"删除";
         }else{
@@ -91,7 +87,7 @@
 
 -(void)openCreateViewController:(NSString *)themeName
 {
-    [self.tableView setEditing:NO animated:YES];
+    [_tableView setEditing:NO animated:YES];
     ThemeCreateViewController *createVC = [ThemeCreateViewController new];
     createVC.selectedThemeName = themeName;
     [self.navigationController pushViewController:createVC animated:YES];
@@ -107,13 +103,20 @@
 -(void)setTableViewData
 {
     self.tableViewCellId = @"YV_ThemeListViewControllerCell";
-    if([self.tableView respondsToSelector:@selector(setSeparatorInset:)]){
-        self.tableView.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
+
+    _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    if([_tableView respondsToSelector:@selector(setSeparatorInset:)]){
+        _tableView.separatorInset = UIEdgeInsetsMake(0, 2, 0, 1);
     }
-    if([self.tableView respondsToSelector:@selector(setLayoutMargins:)]){
-        self.tableView.layoutMargins = UIEdgeInsetsZero;
+    if([_tableView respondsToSelector:@selector(setLayoutMargins:)]){
+        _tableView.layoutMargins = UIEdgeInsetsZero;
     }
-    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)];
+    _tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)];
+
+    [self.view addSubview:_tableView];
 }
 
 -(void)loadThemeList
@@ -135,7 +138,7 @@
     NSString *currentName = [ThemeEditManager currentThemeName];
     self.currentName = currentName;
 
-    [self.tableView reloadData];
+    [_tableView reloadData];
 }
 
 #pragma mark ======== delegate ==========
