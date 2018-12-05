@@ -13,7 +13,6 @@
 #import "ThemeCreateViewController.h"
 #import "UIView+YV_AlertView.h"
 
-
 #define isIpad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
 @interface ThemeSelectViewController ()<UITableViewDelegate,UITableViewDataSource>
@@ -114,6 +113,7 @@
     if([self.tableView respondsToSelector:@selector(setLayoutMargins:)]){
         self.tableView.layoutMargins = UIEdgeInsetsZero;
     }
+    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)];
 }
 
 -(void)loadThemeList
@@ -158,16 +158,16 @@
 {
     NSArray *tempArr = self.dataList[section];
     if (tempArr.count>0) {
-        return (isIpad?44:38);
+        return (isIpad?58:48);
     }
     return 0;
 }
 
 -(UIView *)createTableViewSectionView:(NSString *)theTitle
 {
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, isIpad?44:38)];
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, isIpad?58:48)];
     headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(isIpad?25:15, 0, 290, isIpad?44:38)];
+    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(isIpad?25:15, 0, 290, isIpad?58:48)];
     tempLabel.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [headerView addSubview:tempLabel];
 //        tempLabel.userInteractionEnabled = YES;
@@ -265,7 +265,7 @@
     __weak typeof(self) weakSelf = self;
     UITableViewRowAction *actionReview = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"复制主题" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
         NSMutableArray *tempArr = weakSelf.dataList[indexPath3.section];
-        NSString *themeName = tempArr[indexPath.row];
+        NSString *themeName = tempArr[indexPath3.row];
         [weakSelf showAlertMessage:@"以该主题为模板创建新主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
             if (isOK) {
                 [weakSelf openCreateViewController:themeName];
@@ -275,21 +275,11 @@
 
 
     if (indexPath.section >0) { // 自定义主题,可以删除.
-        UITableViewRowAction *actionUpload = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"*公测推荐*" handler:^(UITableViewRowAction * action3, NSIndexPath * indexPath3) {
-            NSMutableArray *tempArr = weakSelf.dataList[indexPath3.section];
-            NSString *themeName = tempArr[indexPath.row];
-            [weakSelf showAlertMessage:@"是否打包该主题,邮件推荐给管理?" needConfirm:YES complete:^(BOOL isOK, id data) {
-                if (isOK) {
-//                    [weakSelf openMailToManagerForTheme:themeName];
-                }
-            }];
-        }];
-
         UITableViewRowAction *actionDel = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除主题" handler:^(UITableViewRowAction * action1, NSIndexPath * indexPath1) {
             [weakSelf showAlertMessage:@"确认删除该主题?" needConfirm:YES complete:^(BOOL isOK, id data) {
                 if (isOK) {
                     NSMutableArray *tempArr = weakSelf.dataList[indexPath1.section];
-                    NSString *item = tempArr[indexPath.row];
+                    NSString *item = tempArr[indexPath1.row];
 
                     NSString *result = @"未知错误,请刷新后重试!";
                     if ([[ThemeEditManager currentThemeName] isEqualToString:item]) {
@@ -297,7 +287,7 @@
                     }else if ([ThemeEditManager removeThemeWithName:item]) {
                             //                    result = @"删除成功!";
                         result = nil;
-                        [tempArr removeObjectAtIndex:indexPath.row];
+                        [tempArr removeObjectAtIndex:indexPath1.row];
                     }else{
                         result = @"删除失败!";
                     }
@@ -315,7 +305,7 @@
 
         }];
 
-        return @[actionDel,actionReview,actionUpload];
+        return @[actionDel,actionReview];
     }
 
     return @[actionReview];
@@ -380,9 +370,6 @@
 {
     return [UIView showAlertWithTitle:nil withText:message type:5 forViewController:self completionHandler:completionHandler];
 }
-
-
-
 
 
 @end

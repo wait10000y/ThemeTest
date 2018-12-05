@@ -419,9 +419,9 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
         NSArray *tempOpList = [_callBlockTable allObjects];
         [_callBlockTable removeAllObjects];
         [opLock unlock];
-        for (NSOperation *tempOp in tempOpList) {
+        [tempOpList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSOperation *tempOp, NSUInteger idx, BOOL * _Nonnull stop) {
             [tempOp cancel];
-        }
+        }];
     }
 
     NSLog(@"主题切换:%@ -> %@",currentName,theName);
@@ -444,7 +444,8 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
     if (tempList.count>0) {
         NSString *tempName = currentName;
         WSThemeModel *tempModel = currentModel;
-        for (id<WSThemeChangeDelegate> tempDelegate in tempList) {
+
+        [tempList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<WSThemeChangeDelegate> tempDelegate, NSUInteger idx, BOOL * _Nonnull stop) {
             NSOperation *newOp2 = [NSBlockOperation blockOperationWithBlock:^{
                 [tempDelegate wsThemeHasChanged:tempName themeModel:tempModel];
             }];
@@ -452,7 +453,8 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
             [_callBlockTable addObject:newOp2];
             [opLock unlock];
             [[NSOperationQueue mainQueue] addOperation:newOp2];
-        }
+        }];
+
     }
     [_updateQueue setSuspended:NO];
     return YES;
@@ -492,7 +494,8 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
 {
     BOOL subNum = 0;
     WSThemeFile *tempFile = [WSThemeFile new];
-    for (NSString *tempName in nameList) {
+    for (int it=0; it<nameList.count; it++) {
+        NSString *tempName = nameList[it];
         if ([tempName isEqualToString:currentName]) { // 当前主题使用的不可删除.
             continue;
         }
@@ -607,8 +610,11 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
 
     _cacheDictList = [[NSMutableArray alloc] initWithCapacity:WSThemeValueTypeOriginal];
     for (int it=0; it<WSThemeValueTypeOriginal; it++) {
-        NSDictionary *tempDict = (tempArray.count>it)?tempArray[it]:nil;
-        [_cacheDictList addObject:[[NSMutableDictionary alloc] initWithDictionary:tempDict]];
+        if (tempArray.count>it) {
+            [_cacheDictList addObject:[[NSMutableDictionary alloc] initWithDictionary:tempArray[it]]];
+        }else{
+            [_cacheDictList addObject:[NSMutableDictionary new]];
+        }
     }
 }
 
@@ -890,6 +896,7 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
         }else{
             tempStr =[NSString stringWithFormat:@"#%.2X%.2X%.2X",R,G,B];
         }
+        return tempStr;
     }
     return @"";
 }
@@ -1007,16 +1014,15 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
 
         __weak typeof(self) weakSelf = self;
         NSOperation *updateOp = [NSBlockOperation blockOperationWithBlock:^{
-            NSArray *valueBlockArray = weakSelf.customBlockDict.allKeys;
-            for (WSThemeConfigValueBlock valueBlock in valueBlockArray) {
-                NSArray *identifierArray = [weakSelf.customBlockDict objectForKey:valueBlock];
+                // 多线程,快速遍历
+            [weakSelf.customBlockDict enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(WSThemeConfigValueBlock valueBlock, NSArray *identifierArray, BOOL * _Nonnull stop) {
                 if (identifierArray && weakSelf.currentModel == currentModel) {
                     [weakSelf getValueFromMdodel:weakSelf.currentModel identifier:[identifierArray firstObject] valueType:((NSNumber *)[identifierArray lastObject]).intValue valueBlock:valueBlock];
                 }else{
                     NSLog(@"theme已改变 取消其他更新调用:%@",weakSelf.currentModel.name);
-                    break;
+                    *stop = YES;
                 }
-            }
+            }];
         }];
         [self.opLock lock];
         [self.operationList addObject:updateOp];
@@ -1125,7 +1131,9 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
     opList = [[self.operationList allObjects] copy];
     [self.operationList removeAllObjects];
     [self.opLock unlock];
-    for (NSOperation *tempOp in opList) {[tempOp cancel];}
+    [opList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSOperation *tempOp, NSUInteger idx, BOOL * _Nonnull stop) {
+        [tempOp cancel];
+    }];
 }
 
 -(void)dealloc

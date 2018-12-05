@@ -15,7 +15,6 @@
 #import "UIView+YV_AlertView.h"
 #import "SSImagePickerHelper.h"
 
-
 #define isIpad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
 @interface ThemeCreateViewController ()<UINavigationControllerDelegate,UIGestureRecognizerDelegate,UITableViewDelegate,UITableViewDataSource>
@@ -158,8 +157,8 @@ __weak typeof(self) weakSelf = self;
 
 -(IBAction)actionTableViewSectionEvent:(UIControl *)sender
 {
-    NSNumber *showTag = self.sectionStatusList[sender.tag];
-    [self.sectionStatusList replaceObjectAtIndex:sender.tag withObject:@(!showTag.boolValue)];
+    BOOL showTag = [self.sectionStatusList[sender.tag] boolValue];
+    [self.sectionStatusList replaceObjectAtIndex:sender.tag withObject:@(!showTag)];
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:sender.tag] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
@@ -181,6 +180,7 @@ __weak typeof(self) weakSelf = self;
     if([self.tableView respondsToSelector:@selector(setLayoutMargins:)]){
         self.tableView.layoutMargins = UIEdgeInsetsZero;
     }
+    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)];
 
     NSString *title = @"(复制)";
     NSRange tempRange = [self.selectedThemeName rangeOfString:title];
@@ -351,19 +351,23 @@ __weak typeof(self) weakSelf = self;
 {
     NSArray *tempArr = self.subTitleList[section];
     if (tempArr.count>0) {
-        return (isIpad?44:38);
+        return (isIpad?58:48);
     }
     return 0;
 }
 
 -(UIView *)createTableViewSectionView:(NSString *)theTitle withSection:(NSInteger)section
 {
-    UIControl *headerView = [[UIControl alloc] initWithFrame:CGRectMake(0, 0, 320, isIpad?44:38)];
+    CGFloat viewHeight = isIpad?58:48;
+    CGFloat marginX = isIpad?25:15;
+    BOOL showTag = [self.sectionStatusList[section] boolValue];
+
+    UIControl *headerView = [[UIControl alloc] initWithFrame:CGRectMake(0, 0, 320, viewHeight)];
     [headerView addTarget:self action:@selector(actionTableViewSectionEvent:) forControlEvents:UIControlEventTouchUpInside];
+    headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     headerView.tag = section;
 
-    headerView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(isIpad?25:15, 0, 290, isIpad?44:38)];
+    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(marginX, 0, 290, viewHeight)];
     tempLabel.font = [UIFont systemFontOfSize:isIpad?20:16];
     tempLabel.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     [headerView addSubview:tempLabel];
@@ -371,6 +375,14 @@ __weak typeof(self) weakSelf = self;
     tempLabel.adjustsFontSizeToFitWidth = YES;
     tempLabel.text = theTitle;
     tempLabel.textColor = [UIColor grayColor];
+
+    UIImageView *tagView = [[UIImageView alloc] initWithFrame:CGRectMake(320-viewHeight, viewHeight/4, viewHeight/2, viewHeight/2)];
+    tagView.contentMode = UIViewContentModeScaleAspectFit;
+    tagView.image = [[UIImage imageNamed:showTag?@"down.png":@"minus.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    [tagView setTintColor:[UIColor lightGrayColor]];
+
+    tagView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [headerView addSubview:tagView];
 
     return headerView;
 }
@@ -562,7 +574,7 @@ __weak typeof(self) weakSelf = self;
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"原始值修改" isEqualToString:title]){
                 [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
@@ -580,7 +592,7 @@ __weak typeof(self) weakSelf = self;
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"修改编辑类型",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"修改编辑类型",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"修改编辑类型" isEqualToString:title]){
                 [weakSelf showTypeChangeViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, NSNumber *value) {
@@ -636,7 +648,7 @@ __weak typeof(self) weakSelf = self;
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"字体编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"字体编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"字体内容"];
@@ -665,7 +677,7 @@ __weak typeof(self) weakSelf = self;
 {
     __weak typeof(self) weakSelf = self;
     UITableViewCell *tempCell = [self.tableView cellForRowAtIndexPath:indexPath];
-    [UIView showActionSheetWithTitle:nil withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+    [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"颜色编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"颜色编辑" isEqualToString:title]) {
                 NSString *editViewTitle = [NSString stringWithFormat:@"编辑%@:",itemModel.name?:@"颜色内容"];
