@@ -38,6 +38,7 @@
 		6B63264021B7AA8A00FAF240 /* ThemeCreateViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B63263521B7AA8900FAF240 /* ThemeCreateViewController.m */; };
 		6B63264121B7AA8A00FAF240 /* ThemeEditManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B63263721B7AA8900FAF240 /* ThemeEditManager.m */; };
 		6B63264221B7AA8A00FAF240 /* ThemeSelectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B63263921B7AA8900FAF240 /* ThemeSelectViewController.m */; };
+		6B63264621B7AD2600FAF240 /* ThemeCreateEditAttribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B63264421B7AD2600FAF240 /* ThemeCreateEditAttribute.m */; };
 		6B92DDFA2101EFFC00547839 /* testpic.png in Resources */ = {isa = PBXBuildFile; fileRef = 6B92DDF92101EFFC00547839 /* testpic.png */; };
 		6BADD2D020FEDE5700DCA870 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BADD2CF20FEDE5700DCA870 /* AppDelegate.m */; };
 		6BADD2D620FEDE5700DCA870 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6BADD2D420FEDE5700DCA870 /* Main.storyboard */; };
@@ -103,6 +104,8 @@
 		6B63263721B7AA8900FAF240 /* ThemeEditManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThemeEditManager.m; sourceTree = "<group>"; };
 		6B63263821B7AA8900FAF240 /* ThemeSelectViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThemeSelectViewController.h; sourceTree = "<group>"; };
 		6B63263921B7AA8900FAF240 /* ThemeSelectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThemeSelectViewController.m; sourceTree = "<group>"; };
+		6B63264321B7AD2600FAF240 /* ThemeCreateEditAttribute.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThemeCreateEditAttribute.h; sourceTree = "<group>"; };
+		6B63264421B7AD2600FAF240 /* ThemeCreateEditAttribute.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ThemeCreateEditAttribute.m; sourceTree = "<group>"; };
 		6B92DDF92101EFFC00547839 /* testpic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testpic.png; sourceTree = "<group>"; };
 		6BADD2CB20FEDE5700DCA870 /* test_WSTheme.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test_WSTheme.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BADD2CE20FEDE5700DCA870 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -149,6 +152,8 @@
 		6B57D5E72105DFFA005157C4 /* ThemeEditTools */ = {
 			isa = PBXGroup;
 			children = (
+				6B63264321B7AD2600FAF240 /* ThemeCreateEditAttribute.h */,
+				6B63264421B7AD2600FAF240 /* ThemeCreateEditAttribute.m */,
 				6B57D5F12105DFFA005157C4 /* ThemeCreateEditToolAlertController.h */,
 				6B57D5F22105DFFA005157C4 /* ThemeCreateEditToolAlertController.m */,
 				6B57D5F32105DFFA005157C4 /* ThemeCreateEditViewProtocol.h */,
@@ -211,12 +216,12 @@
 			children = (
 				6B63263621B7AA8900FAF240 /* ThemeEditManager.h */,
 				6B63263721B7AA8900FAF240 /* ThemeEditManager.m */,
+				6B63263821B7AA8900FAF240 /* ThemeSelectViewController.h */,
+				6B63263921B7AA8900FAF240 /* ThemeSelectViewController.m */,
 				6B63263221B7AA8900FAF240 /* ThemeCreateHeaderView.h */,
 				6B63263321B7AA8900FAF240 /* ThemeCreateHeaderView.m */,
 				6B63263421B7AA8900FAF240 /* ThemeCreateViewController.h */,
 				6B63263521B7AA8900FAF240 /* ThemeCreateViewController.m */,
-				6B63263821B7AA8900FAF240 /* ThemeSelectViewController.h */,
-				6B63263921B7AA8900FAF240 /* ThemeSelectViewController.m */,
 			);
 			path = ThemeEditViews;
 			sourceTree = "<group>";
@@ -269,15 +274,15 @@
 		6BADD2E420FEDF8000DCA870 /* WSTheme */ = {
 			isa = PBXGroup;
 			children = (
+				6B350F19212BD60000A165C0 /* README.md */,
+				6BADD2E620FEDF8000DCA870 /* WSTheme.h */,
+				6BADD2E720FEDF8000DCA870 /* WSTheme.m */,
 				6B621463211051F8003F23E0 /* WSThemeSimple.h */,
 				6B621464211051F8003F23E0 /* WSThemeSimple.m */,
 				6B57D6122106CA07005157C4 /* yivian.json */,
 				6B57D6132106CA07005157C4 /* yivian_tl.json */,
 				6BADD2E520FEDF8000DCA870 /* default.json */,
 				6B16868921096474008FAB20 /* default_tl.json */,
-				6B350F19212BD60000A165C0 /* README.md */,
-				6BADD2E620FEDF8000DCA870 /* WSTheme.h */,
-				6BADD2E720FEDF8000DCA870 /* WSTheme.m */,
 			);
 			path = WSTheme;
 			sourceTree = "<group>";
@@ -383,6 +388,7 @@
 				6B62146921105D9F003F23E0 /* TestWSThemeSimpleViewController.m in Sources */,
 				6B63263A21B7AA8A00FAF240 /* SSImagePickerHelper.m in Sources */,
 				6B57D6042105DFFA005157C4 /* ThemeCreateEditToolAlertController.m in Sources */,
+				6B63264621B7AD2600FAF240 /* ThemeCreateEditAttribute.m in Sources */,
 				6B63263C21B7AA8A00FAF240 /* UIImage+YV_ColorImage.m in Sources */,
 				6B57D6002105DFFA005157C4 /* ThemeCreateEditFontView.m in Sources */,
 				6B63264221B7AA8A00FAF240 /* ThemeSelectViewController.m in Sources */,

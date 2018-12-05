@@ -304,12 +304,18 @@ static NSURL *templateJsonDictUrl;
 
 +(ThemeEditItemModel*)createWithValue:(id)value withKeypath:(NSString *)keypath
 {
+    return [self createWithName:keypath type:ThemeEditItemTypeNone order:nil value:value withKeypath:keypath];
+}
+
++(ThemeEditItemModel*)createWithName:(NSString *)theName type:(ThemeEditItemType)type order:(NSNumber*)order value:(id)value withKeypath:(NSString *)keypath
+{
     if (!keypath) { return nil; }
     ThemeEditItemModel *item = [[ThemeEditItemModel alloc] init];
     item.value = item.defalut = value;
-    item.order =@(NSIntegerMax);
-    item.mType = ThemeEditItemTypeNone;
-    item.name = item.keypath = keypath;
+    item.order = order?:@(NSIntegerMax);
+    item.mType = type;
+    item.name = theName?:keypath;
+    item.keypath = keypath;
 
     /**
         if (value) {

@@ -107,7 +107,7 @@ typedef enum : NSUInteger {
 
     // keypath格式 全局位置, 未定义模板. none类型 创建;
 +(ThemeEditItemModel*)createWithValue:(id)value withKeypath:(NSString *)keypath;
-
++(ThemeEditItemModel*)createWithName:(NSString *)theName type:(ThemeEditItemType)type order:(NSNumber*)order value:(id)value withKeypath:(NSString *)keypath;
     // keypath格式 全局位置;
 // dict 是keypath对应模板内容.
 +(ThemeEditItemModel*)createWithModelDict:(NSDictionary*)dict withKeypath:(NSString *)keypath;

@@ -13,8 +13,7 @@
 
 @interface ThemeSelectViewController ()<UITableViewDelegate,UITableViewDataSource>
 
-@property (nonatomic) IBOutlet UITableView *tableView;
-
+@property (nonatomic) UITableView *tableView;
 @property (nonatomic) NSString *tableViewCellId;
 @property (nonatomic) NSArray *dataList; // 两级array,系统theme列表,自定义列表;
 
@@ -26,7 +25,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
     self.title = @"选择主题";
     self.dataList = @[[NSMutableArray new],[NSMutableArray new]];
     self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:nil];
@@ -105,6 +104,7 @@
     self.tableViewCellId = @"YV_ThemeListViewControllerCell";
 
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    _tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     _tableView.delegate = self;
     _tableView.dataSource = self;

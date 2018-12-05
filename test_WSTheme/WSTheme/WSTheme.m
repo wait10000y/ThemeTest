@@ -873,6 +873,61 @@ NSNotificationName const WSThemeUpdateNotificaiton = @"WSThemeUpdateNotificaiton
             }
         }];
 
+        /**
+         UIKIT_EXTERN NSAttributedStringKey const NSParagraphStyleAttributeName NS_AVAILABLE(10_0, 6_0);      // NSParagraphStyle, default defaultParagraphStyle
+         UIKIT_EXTERN NSAttributedStringKey const NSShadowAttributeName NS_AVAILABLE(10_0, 6_0);              // NSShadow, default nil: no shadow
+
+         UIKIT_EXTERN NSAttributedStringKey const NSAttachmentAttributeName NS_AVAILABLE(10_0, 7_0);          // NSTextAttachment, default nil
+
+         UIKIT_EXTERN NSAttributedStringKey const NSWritingDirectionAttributeName NS_AVAILABLE(10_6, 7_0);    // NSArray of NSNumbers representing the nested levels of writing direction overrides as defined by Unicode LRE, RLE, LRO, and RLO characters.  The control characters can be obtained by masking NSWritingDirection and NSWritingDirectionFormatType values.  LRE: NSWritingDirectionLeftToRight|NSWritingDirectionEmbedding, RLE: NSWritingDirectionRightToLeft|NSWritingDirectionEmbedding, LRO: NSWritingDirectionLeftToRight|NSWritingDirectionOverride, RLO: NSWritingDirectionRightToLeft|NSWritingDirectionOverride,
+
+
+         */
+        // 特殊属性设置
+        NSDictionary *tempDict = [value objectForKey:@"NSParagraphStyleAttributeName"];
+        if ([tempDict isKindOfClass:[NSDictionary class]] && tempDict.count) {
+            NSParagraphStyle *pstyle = [NSParagraphStyle defaultParagraphStyle];
+            @try{
+                [tempDict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                    [pstyle setValue:obj forKeyPath:key];
+                }];
+            } @catch(NSException *exception){
+            }
+            [attrs setObject:pstyle forKey:NSParagraphStyleAttributeName];
+        }
+
+        tempDict = [value objectForKey:@"NSShadowAttributeName"];
+        if ([tempDict isKindOfClass:[NSDictionary class]] && tempDict.count) {
+            NSShadow *shadow = [[NSShadow alloc] init];
+            @try{
+                [tempDict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                    [shadow setValue:obj forKeyPath:key];
+                }];
+            } @catch(NSException *exception){
+            }
+            [attrs setObject:shadow forKey:NSShadowAttributeName];
+        }
+
+        tempDict = [value objectForKey:@"NSAttachmentAttributeName"];
+        if ([tempDict isKindOfClass:[NSDictionary class]] && tempDict.count) {
+            NSTextAttachment *pstyle = [[NSTextAttachment alloc] init];
+            @try{
+                [tempDict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                    [pstyle setValue:obj forKeyPath:key];
+                }];
+            } @catch(NSException *exception){
+            }
+            [attrs setObject:pstyle forKey:NSAttachmentAttributeName];
+        }
+
+        tempDict = [value objectForKey:@"NSWritingDirectionAttributeName"];
+        if ([tempDict isKindOfClass:[NSDictionary class]] && tempDict.count) {
+            @try{
+                [attrs setObject:tempDict.allValues forKey:NSWritingDirectionAttributeName];
+            } @catch(NSException *exception){
+            }
+        }
+
         if (attrs.count>0) {
             return [NSDictionary dictionaryWithDictionary:attrs];
         }

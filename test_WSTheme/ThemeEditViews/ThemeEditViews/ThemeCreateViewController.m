@@ -8,6 +8,7 @@
 #import "ThemeCreateHeaderView.h"
 
 #import "ThemeCreateEditToolAlertController.h"
+#import "ThemeCreateEditAttribute.h"
 #import "UIView+YV_AlertView.h"
 #import "SSImagePickerHelper.h"
 
@@ -55,7 +56,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"添加主题";
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
     
     _hasLoadThemeData = NO;
     self.editManager = [ThemeEditManager new];
@@ -174,7 +175,7 @@ __weak typeof(self) weakSelf = self;
 
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-
+    _tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     _tableView.delegate = self;
     _tableView.dataSource = self;
 
@@ -249,11 +250,12 @@ __weak typeof(self) weakSelf = self;
 
 -(void)backLastViewAndShowMessage:(NSString *)theMsg
 {
+    __weak typeof(self) weakSelf = self;
     [self showAlertMessage:theMsg needConfirm:NO complete:^(BOOL isOK, id data) {
-        if (self.navigationController) {
-            [self.navigationController popViewControllerAnimated:YES];
+        if (weakSelf.navigationController) {
+            [weakSelf.navigationController popViewControllerAnimated:YES];
         }else{
-            [self dismissViewControllerAnimated:YES completion:nil];
+            [weakSelf dismissViewControllerAnimated:YES completion:nil];
         }
     }];
 }
@@ -567,7 +569,7 @@ __weak typeof(self) weakSelf = self;
         } break;
         case ThemeEditItemTypeDict: // dict
         {
-            [self showDefaultEditSelectViewForItem:itemModel withIndexPath:indexPath];
+            [self showAttributeEditSelectViewForItem:itemModel withIndexPath:indexPath];
         } break;
         default:
         {
@@ -577,6 +579,45 @@ __weak typeof(self) weakSelf = self;
 
 }
 
+//ThemeCreateEditAttribute
+-(void)showAttributeEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
+{
+
+    __weak typeof(self) weakSelf = self;
+    UITableViewCell *tempCell = [_tableView cellForRowAtIndexPath:indexPath];
+    [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"字典内容编辑",@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
+        if(isOK){
+            if ([@"原始值修改" isEqualToString:title]){
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
+                    if (isChange) {
+                        itemModel.value = value;
+                        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    }
+                }];
+            }else if([@"字典内容编辑" isEqualToString:title]){
+                NSDictionary *tempValue = itemModel.value;
+                if (![tempValue isKindOfClass:[NSDictionary class]]) {
+                    if ([tempValue isKindOfClass:[NSNull class]] || [tempValue description].length==0) {
+                        tempValue = @{};
+                    }else{
+                        tempValue = nil;
+                    }
+                }
+                if (tempValue) {
+                    ThemeCreateEditAttribute *editVC = [ThemeCreateEditAttribute new];
+                    editVC.attributeDict = tempValue;
+                    editVC.editCallBack = ^(NSDictionary * _Nonnull editedDict) {
+                        itemModel.value = [editedDict copy];
+                    };
+                    [weakSelf.navigationController pushViewController:editVC animated:YES];
+                }else{
+                    [weakSelf showAlertMessage:@"已存在非字典内容,无法使用字典内容编辑器!" needConfirm:NO complete:nil];
+                }
+            }
+        }
+    }];
+}
+
 -(void)showDefaultEditSelectViewForItem:(ThemeEditItemModel *)itemModel withIndexPath:(NSIndexPath *)indexPath
 {
     __weak typeof(self) weakSelf = self;
@@ -584,7 +625,7 @@ __weak typeof(self) weakSelf = self;
     [UIView showActionSheetWithTitle:@"操作提示: " withText:nil withActionNames:@[@"原始值修改"] forViewController:self forView:tempCell completionHandler:^(BOOL isOK, NSString *title) {
         if(isOK){
             if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -637,10 +678,10 @@ __weak typeof(self) weakSelf = self;
                     }
                 }];
                 [textAlert setTipTitle:editViewTitle];
-                [self presentViewController:textAlert animated:YES completion:nil];
+                [weakSelf presentViewController:textAlert animated:YES completion:nil];
 
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:nil complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -667,9 +708,9 @@ __weak typeof(self) weakSelf = self;
                     }
                 }];
                 [fontAlert setTipTitle:editViewTitle];
-                [self presentViewController:fontAlert animated:YES completion:nil];
+                [weakSelf presentViewController:fontAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"字号或(字体名:字号)格式:" complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"字号或(字体名:字号)格式:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -696,9 +737,9 @@ __weak typeof(self) weakSelf = self;
                     }
                 }];
                 [colorAlert setTipTitle:editViewTitle];
-                [self presentViewController:colorAlert animated:YES completion:nil];
+                [weakSelf presentViewController:colorAlert animated:YES completion:nil];
             }else if ([@"原始值修改" isEqualToString:title]){
-                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"#ARGB十六进制格式或数字:" complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"#ARGB十六进制格式或数字:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                         itemModel.value = value;
                         [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -761,7 +802,7 @@ __weak typeof(self) weakSelf = self;
                 }];
 
             }else if ([@"修改地址" isEqualToString:title]){ // 会删除原资源文件.
-                [self showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"图片名称或主题资源名称:" complete:^(BOOL isChange, id value) {
+                [weakSelf showTextEditViewForUnKnowTypeValue:itemModel withTitle:@"图片名称或主题资源名称:" complete:^(BOOL isChange, id value) {
                     if (isChange) {
                             // 如果目标文件存在,删除原资源;如果目标文件不存在,修改原资源名称.
                         NSString *cText = [itemModel.value description];
